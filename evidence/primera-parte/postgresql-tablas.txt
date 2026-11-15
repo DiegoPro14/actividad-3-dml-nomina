@@ -1,0 +1,15 @@
+PostgreSQL 18.6, database nomina_u3_pruebas
+cargo
+categoria
+complemento
+contrato
+deduccion
+detalle_deduccion
+detalle_percepcion
+empleado
+nomina
+ocupacion_cargo
+puesto
+puesto_complemento
+tramo_deduccion
+count=13

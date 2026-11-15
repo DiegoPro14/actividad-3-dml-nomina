@@ -1,0 +1,46 @@
+PostgreSQL 18.6 — base nomina_u3_pruebas — catálogo de solo lectura (rol nomina_ro)
+Consulta a pg_catalog; no lee filas. Fecha: 2026-11-14T19:55:55-05:00
+
+== Columnas ==
+cargo|id_cargo:integer:NOT NULL, nombre_cargo:character varying(60), importe_complemento_cargo:numeric(12,2)
+categoria|id_categoria:integer:NOT NULL, nombre_categoria:character varying(50), sueldo_base:numeric(12,2), importe_trienio:numeric(12,2)
+complemento|id_complemento:integer:NOT NULL, nombre_complemento:character varying(60), importe:numeric(12,2)
+contrato|id_contrato:integer:NOT NULL, fecha_alta:date, fecha_baja:date, dni_empleado:character varying(15), id_categoria:integer, id_puesto:integer
+deduccion|id_deduccion:integer:NOT NULL, nombre_deduccion:character varying(60), tipo_calculo:character varying(30), porcentaje_fijo:numeric(5,2)
+detalle_deduccion|id_detalle_deduccion:integer:NOT NULL, importe:numeric(12,2), id_nomina:integer, id_deduccion:integer
+detalle_percepcion|id_detalle_percepcion:integer:NOT NULL, concepto:character varying(80), importe:numeric(12,2), id_nomina:integer
+empleado|dni:character varying(15):NOT NULL, nombres:character varying(60), apellidos:character varying(60), telefono:character varying(15), direccion:character varying(120), fecha_nacimiento:date, num_cuenta_corriente:character varying(30)
+nomina|id_nomina:integer:NOT NULL, mes:smallint, anio:smallint, fecha_emision:date, total_percepciones:numeric(12,2), total_deducciones:numeric(12,2), neto_a_pagar:numeric(12,2), dni_empleado:character varying(15)
+ocupacion_cargo|dni_empleado:character varying(15):NOT NULL, id_cargo:integer:NOT NULL, fecha_inicio:date, fecha_fin:date
+puesto|id_puesto:integer:NOT NULL, nombre_puesto:character varying(60), sucursal:character varying(60)
+puesto_complemento|id_puesto:integer:NOT NULL, id_complemento:integer:NOT NULL
+tramo_deduccion|id_tramo:integer:NOT NULL, limite_inferior:numeric(12,2), limite_superior:numeric(12,2), porcentaje:numeric(5,2), id_deduccion:integer
+
+== Claves primarias ==
+cargo|id_cargo
+categoria|id_categoria
+complemento|id_complemento
+contrato|id_contrato
+deduccion|id_deduccion
+detalle_deduccion|id_detalle_deduccion
+detalle_percepcion|id_detalle_percepcion
+empleado|dni
+nomina|id_nomina
+ocupacion_cargo|dni_empleado,id_cargo
+puesto|id_puesto
+puesto_complemento|id_puesto,id_complemento
+tramo_deduccion|id_tramo
+
+== Claves foráneas ==
+contrato.dni_empleado->empleado.dni|del:RESTRICT|upd:CASCADE
+contrato.id_categoria->categoria.id_categoria|del:RESTRICT|upd:CASCADE
+contrato.id_puesto->puesto.id_puesto|del:RESTRICT|upd:CASCADE
+detalle_deduccion.id_deduccion->deduccion.id_deduccion|del:RESTRICT|upd:CASCADE
+detalle_deduccion.id_nomina->nomina.id_nomina|del:CASCADE|upd:CASCADE
+detalle_percepcion.id_nomina->nomina.id_nomina|del:CASCADE|upd:CASCADE
+nomina.dni_empleado->empleado.dni|del:RESTRICT|upd:CASCADE
+ocupacion_cargo.dni_empleado->empleado.dni|del:CASCADE|upd:CASCADE
+ocupacion_cargo.id_cargo->cargo.id_cargo|del:RESTRICT|upd:CASCADE
+puesto_complemento.id_complemento->complemento.id_complemento|del:RESTRICT|upd:CASCADE
+puesto_complemento.id_puesto->puesto.id_puesto|del:CASCADE|upd:CASCADE
+tramo_deduccion.id_deduccion->deduccion.id_deduccion|del:CASCADE|upd:CASCADE

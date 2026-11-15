@@ -1,0 +1,12 @@
+Evidencia: ERD de PostgreSQL generado con pgAdmin (punto 4)
+Fecha: 2026-11-14T21:17:19-05:00
+Cliente: pgAdmin 4 9.19 (contenedor pgadmin4-u3)
+Conexión: 7502220042_2_nomina/nomina_rw@NOMINA prueba PostgreSQL (127.0.0.1:55432)
+Método: seleccionar la base en el árbol → menú Object → 'ERD For Database'.
+Resultado: diagrama generado con las 13 tablas del esquema public y sus relaciones.
+
+Captura: deliverables/capturas/p1-punto-04-postgresql-erd.png
+Bytes: 236290
+SHA-256: e65fea03d25de3c8116ecc877a8e268cab2aa4b3f736be6e497c9e93d98c3e76  deliverables/capturas/p1-punto-04-postgresql-erd.png
+
+Pendiente: ERD de Oracle (SQL Developer Data Modeler) y de SQL Server (DBeaver o SSMS).

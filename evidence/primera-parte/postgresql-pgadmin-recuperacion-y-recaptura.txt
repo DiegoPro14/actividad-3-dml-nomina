@@ -1,0 +1,30 @@
+Evidencia: recuperación de pgAdmin y recaptura del punto 1 (PostgreSQL)
+Fecha: 2026-11-14T20:55:10-05:00
+Clúster: <ruta-del-clúster>/pgdata; puerto 55432
+
+== Identidad de la copia (solo lectura) ==
+7502220042_2_nomina|nomina_ro|ro=on
+tablas=13
+nomina=5
+detalle=6
+
+== Privilegios observados de nomina_rw ==
+detalle_percepcion:DELETE,INSERT,SELECT,UPDATE
+nomina:INSERT,SELECT,UPDATE,DELETE
+
+== pgAdmin ==
+Incidente: contenedor pgadmin4-u3 salió con código 3 ('Migration failed').
+Causa observada: /var/lib/pgadmin/pgadmin4.db quedó con dueño uid 1000 (host) en vez de 5050 (pgadmin);
+pgAdmin creó una base vacía y movió la ilegible a pgadmin4.db.<timestamp>.
+Corrección: se restauró la copia con dueño 5050:0 y modo 600; además se eliminaron de la tabla 'setting'
+las filas 'Browser/Layout' y 'browser_tree_state', que restauraban una pestaña ERD con la base vieja (OID 16384).
+Resultado: HTTP 200 en /login y conexión correcta a 7502220042_2_nomina.
+
+== Captura ==
+Archivo: deliverables/capturas/p1-punto-01-pgadmin-conexion.png
+Bytes: 113796
+SHA-256: cfce6ddb04f3a0ac30a2656fd2594f4661bbee828252ba8b2465d5183d8a6de5  deliverables/capturas/p1-punto-01-pgadmin-conexion.png
+
+Contenido visible: conexión '7502220042_2_nomina/nomina_rw@NOMINA prueba PostgreSQL';
+resultado de la consulta: base=7502220042_2_nomina, usuario=nomina_rw, tablas=13, nominas=5, detalles=6;
+árbol de objetos con la base renombrada.

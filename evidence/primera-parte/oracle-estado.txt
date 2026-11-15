@@ -1,0 +1,20 @@
+Oracle 26ai Free; import attempt
+
+BANNER_FULL
+--------------------------------------------------------------------------------
+Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for F
+ree
+Version 23.26.3.0.0
+
+
+FILENAME		VERSION     CON_ID
+-------------------- ---------- ----------
+timezlrg_45.dat 	     45 	 0
+Version 23.26.3.0.0
+
+Copyright (c) 1982, 2026, Oracle and/or its affiliates.  All rights reserved.
+
+Connected to: Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free
+ORA-39002: invalid operation
+ORA-39405: Oracle Data Pump does not support importing from a source database with TSTZ version 45 into a target database with TSTZ version 43.
+

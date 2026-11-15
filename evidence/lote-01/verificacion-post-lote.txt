@@ -1,0 +1,20 @@
+Verification timestamp: 2026-11-14T11:52:54-05:00
+Cluster: <ruta-del-clúster>/pgdata; database: nomina_u3_pruebas; port: 55432
+--- Read-only identity and counts (nomina_ro) ---
+nomina_u3_pruebas|nomina_ro|on
+rows_nomina|0
+rows_detalle_percepcion|0
+rows_empleado|0
+nomina_seq|1|f
+detalle_seq|1|f
+--- Reset sequences to dump state (nomina_rw) ---
+nomina_rw
+1
+1
+--- Final read-only verification (nomina_ro) ---
+nomina_u3_pruebas|nomina_ro|on
+rows_nomina|0
+rows_detalle_percepcion|0
+rows_empleado|0
+nomina_seq|1|f
+detalle_seq|1|f

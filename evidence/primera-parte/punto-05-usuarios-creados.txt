@@ -1,0 +1,27 @@
+Evidencia: punto 5 — usuario 7502220042_darias creado y verificado
+Fecha: 2026-11-14T21:12:16-05:00
+Contraseñas: extraídas por OCR de los PDF de la Actividad 2 a archivos temporales 0600;
+no se transcriben aquí y los archivos se eliminaron al terminar.
+
+== PostgreSQL ==
+Clúster: <ruta-del-clúster>/pgdata; puerto 55432; base 7502220042_2_nomina
+rol=7502220042_darias|login=true|super=false
+privilegios_tablas=52 en 13 tablas
+reconexion=7502220042_darias@7502220042_2_nomina|tablas_visibles=13
+nomina_rw_tablas_con_dml=13
+
+== SQL Server ==
+Contenedor mssql-u3; base 7502220042_2_nomina
+login=7502220042_darias|disabled=0
+rol=db_owner
+reconexion=7502220042_darias@7502220042_2_nomina|db_owner=1
+Hallazgo: el .bak traía un usuario huérfano con SID distinto; se remapeó con ALTER USER ... WITH LOGIN.
+
+== Oracle ==
+Contenedor oracle-u3; PDB NOMINAPDB
+usuario=7502220042_darias|estado=OPEN
+rol=DBA
+reconexion=7502220042_darias@NOMINAPDB
+
+== Límites ==
+Verificación por CLI; las capturas GUI de los puntos 5, 6 y 7 siguen pendientes.

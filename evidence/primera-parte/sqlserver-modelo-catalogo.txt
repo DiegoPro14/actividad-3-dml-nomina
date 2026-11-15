@@ -1,0 +1,37 @@
+SQL Server 2025 — base 7502220042_2_nomina — metadatos (solo lectura). Fecha: 2026-11-14T19:58:25-05:00
+
+== Tablas ==
+Changed database context to '7502220042_2_nomina'.
+cargo
+categoria
+complemento
+contrato
+deduccion
+detalle_deduccion
+detalle_percepcion
+empleado
+nomina
+ocupacion_cargo
+puesto
+puesto_complemento
+tramo_deduccion
+== Conteo ==
+Changed database context to '7502220042_2_nomina'.
+tablas=13
+pk=13
+fk=12
+
+== Claves foráneas ==
+Changed database context to '7502220042_2_nomina'.
+contrato.dni_empleado->empleado.dni|del:NO_ACTION|upd:NO_ACTION
+contrato.id_categoria->categoria.id_categoria|del:NO_ACTION|upd:NO_ACTION
+contrato.id_puesto->puesto.id_puesto|del:NO_ACTION|upd:NO_ACTION
+detalle_deduccion.id_deduccion->deduccion.id_deduccion|del:NO_ACTION|upd:NO_ACTION
+detalle_deduccion.id_nomina->nomina.id_nomina|del:CASCADE|upd:NO_ACTION
+detalle_percepcion.id_nomina->nomina.id_nomina|del:CASCADE|upd:NO_ACTION
+nomina.dni_empleado->empleado.dni|del:NO_ACTION|upd:NO_ACTION
+ocupacion_cargo.dni_empleado->empleado.dni|del:NO_ACTION|upd:NO_ACTION
+ocupacion_cargo.id_cargo->cargo.id_cargo|del:NO_ACTION|upd:NO_ACTION
+puesto_complemento.id_complemento->complemento.id_complemento|del:CASCADE|upd:NO_ACTION
+puesto_complemento.id_puesto->puesto.id_puesto|del:CASCADE|upd:NO_ACTION
+tramo_deduccion.id_deduccion->deduccion.id_deduccion|del:CASCADE|upd:NO_ACTION

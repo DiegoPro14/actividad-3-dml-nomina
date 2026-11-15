@@ -1,0 +1,18 @@
+SQL Server 2025; database 7502220042_2_nomina
+TABLE_SCHEMA|TABLE_NAME
+------------|----------
+dbo|cargo
+dbo|categoria
+dbo|complemento
+dbo|contrato
+dbo|deduccion
+dbo|detalle_deduccion
+dbo|detalle_percepcion
+dbo|empleado
+dbo|nomina
+dbo|ocupacion_cargo
+dbo|puesto
+dbo|puesto_complemento
+dbo|tramo_deduccion
+Table count:
+13

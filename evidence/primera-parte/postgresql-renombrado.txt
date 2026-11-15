@@ -1,0 +1,9 @@
+Renombrado de la copia aislada PostgreSQL — 2026-11-14T20:12:06-05:00
+Clúster: <ruta-del-clúster>/pgdata, puerto 55432
+
+== Conexiones activas antes ==
+
+== Terminando conexiones de la copia ==
+
+== ALTER DATABASE ==
+ALTER DATABASE

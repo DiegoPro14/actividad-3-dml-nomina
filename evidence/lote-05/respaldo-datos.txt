@@ -1,0 +1,16 @@
+Respaldo de datos — estado final (regenerado)
+Fecha: 2026-11-15T12:31:13
+Motivo: el respaldo anterior (12:15) se tomó antes de que terminara el lote 40–57; la restauración
+devolvía un estado anterior. Este respaldo refleja el estado final tras reaplicar 2700/2800.
+
+nomina:
+  INSERT: 24
+  bytes: 5697
+  sha256: c59d637315229bbea1e09cb67000bd547c9ea12199ae1b7f349aeb1eac117750
+detalle_percepcion:
+  INSERT: 6
+  bytes: 1794
+  sha256: b56f4ae096cb52f3cc246c42995c7867ea5cf5bb37eaa8f83e08e6c9b2c00c4c
+
+Estado verificado: nomina=24, detalle=6, id100=2700/270, 21–25=2800/280, TablaY=6.
+Restauración: cd sql/lote-05 && psql -h <ruta-del-clúster>/socket -p 55432 -U ema -d 7502220042_2_nomina -f restaurar-datos.sql

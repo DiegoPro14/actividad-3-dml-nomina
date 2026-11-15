@@ -1,0 +1,22 @@
+# Lista blanca: solo archivos de la actividad.
+# Ignorar todo el contenido de la raíz.
+/*
+!/.gitignore
+!/README.md
+!/deliverables
+!/sql
+!/evidence
+
+# deliverables: solo el informe y las capturas PNG
+/deliverables/*
+!/deliverables/informe-actividad.md
+!/deliverables/informe-actividad.pdf
+!/deliverables/capturas
+/deliverables/capturas/*
+!/deliverables/capturas/*.png
+
+# SQL de los ejercicios
+!/sql/**
+
+# Evidencia de ejecución
+!/evidence/**

@@ -28,7 +28,7 @@ div + h2 { page-break-before: avoid; }
 | Repositorio GitHub (fork, ramas, commits, PR) | *Pendiente* |
 | Video de sustentación | *Pendiente* |
 
-> Los enlaces deben ser públicos o visibles para cualquiera con el enlace. No se publicó nada.
+> Los tres enlaces se completarán al publicar el documento, el repositorio y el video. Mientras la publicación no ocurra, la celda queda como *Pendiente*; no se adelanta ninguna URL. Los enlaces deben ser públicos o visibles para cualquiera que los reciba.
 
 **Entorno de pruebas — versiones de los motores:**
 
@@ -42,13 +42,14 @@ div + h2 { page-break-before: avoid; }
 
 ## Primera parte (30 %)
 
-Cada punto requiere descripción detallada de pasos y capturas.
+Cada punto requiere descripción detallada de pasos y capturas. Cuando un punto se respalda con evidencia textual y no con capturas, se indica expresamente en el propio punto.
 
 ### Punto 1. Clientes SQL GUI oficiales por cada motor
 
-**Descripción de pasos:** se instaló y usó el cliente GUI oficial de cada motor (o el cliente GUI de Microsoft disponible en Linux) y se registró la conexión a la copia de prueba.
+**Descripción de pasos:** Se instaló y usó el cliente GUI oficial de cada motor (o el cliente GUI de Microsoft disponible en Linux) y se registró la conexión a la copia de prueba.
 
 **PostgreSQL — pgAdmin 4 9.19**
+
 1. Cliente oficial de PostgreSQL, ejecutado desde la imagen `dpage/pgadmin4` en `http://127.0.0.1:5050`.
 2. Registro del servidor: nombre `NOMINA prueba PostgreSQL`, host `127.0.0.1`, puerto `55432`, base `7502220042_2_nomina`, usuario de prueba `nomina_rw`.
 3. Verificación en el editor SQL: `SELECT current_database(), current_user, inet_server_port();` y árbol de objetos con las 13 tablas.
@@ -56,6 +57,7 @@ Cada punto requiere descripción detallada de pasos y capturas.
 ![Punto 1 — PostgreSQL con pgAdmin](capturas/p1-punto-01-pgadmin-conexion.png)
 
 **Oracle — SQL Developer 24.3.1**
+
 1. Cliente oficial de Oracle, instalado en la máquina.
 2. Conexión: host `localhost`, puerto `1521`, servicio `NOMINAPDB`, usuario `"7502220042_2_nomina"`.
 3. Verificación: `SELECT COUNT(*) FROM user_tables;` → 13 tablas.
@@ -63,37 +65,65 @@ Cada punto requiere descripción detallada de pasos y capturas.
 ![Punto 1 — Oracle con SQL Developer](capturas/p1-punto-01-oracle-sqldeveloper.png)
 
 **SQL Server — Azure Data Studio 1.52.0**
+
 1. SSMS no está disponible para Linux; se usó Azure Data Studio, el cliente GUI de Microsoft para Linux.
 2. Conexión: `127.0.0.1,1433`, base `7502220042_2_nomina`, usuario `sa`.
 3. Verificación: `SELECT COUNT(*) FROM sys.tables;` → 13 tablas.
 
 ![Punto 1 — SQL Server con Azure Data Studio](capturas/p1-punto-01-sqlserver-ads.png)
 
+**Resultado observado:** los tres clientes quedaron conectados a la copia de prueba. En el editor SQL, Oracle y SQL Server devuelven 13 tablas, y el árbol de pgAdmin 4 muestra las 13 tablas de la base.
+
 ### Punto 2. Restauración de la base
 
-**Descripción de pasos:** se restauró cada respaldo en su motor, sobre una copia aislada, y se verificó el catálogo.
+**Descripción de pasos:** Se restauró cada respaldo en su motor, sobre una copia aislada, y se verificó el catálogo.
 
 **PostgreSQL**
+
 1. Respaldo: `backup_7502220042_2_nomina.dump`, formato custom de PostgreSQL.
 2. Restauración con `pg_restore --single-transaction --no-owner --no-privileges` sobre la base de prueba (creada como `nomina_u3_pruebas` y renombrada después a `7502220042_2_nomina`).
 3. Resultado: 13 tablas, 13 PK y 12 FK; el respaldo no traía filas.
 
 **SQL Server**
+
 1. Respaldo: `BACKUP_7502220042_2_nomina_SQLServer.bak` (versión 998).
 2. SQL Server 2022 no podía restaurarlo; se instaló SQL Server 2025 y se ejecutó `RESTORE DATABASE`.
 3. Resultado: base `7502220042_2_nomina` con 13 tablas en `dbo`.
 
 **Oracle**
+
 1. Respaldo: `BACKUP_7502220042_2_NOMINA.DMP`.
 2. Se creó el PDB `NOMINAPDB`, se actualizó a TSTZ 45 y se usó `_datapump_bypass_tstz_check=TRUE` para superar `ORA-39405`.
 3. Se creó el tablespace `USERS`, el usuario `"7502220042_2_nomina"` y se importó con `impdp`. El único error fue `ORA-31684` porque el usuario ya existía; no afectó las tablas.
 4. Resultado: 13 tablas, 0 filas.
 
+**Resultado observado:** las tres copias quedaron con las 13 tablas del modelo. PostgreSQL reportó además 13 PK y 12 FK; PostgreSQL y Oracle quedaron con 0 filas, porque los respaldos no traían datos.
+
+En la copia de trabajo se comprueba la estructura restaurada con una consulta al catálogo. La copia contiene además `TablaY`, creada en el ejercicio 58 de la segunda parte, así que se excluye para contar solo las tablas del modelo:
+
+```sql
+SELECT count(*) AS tablas,
+       (SELECT count(*) FROM information_schema.table_constraints
+         WHERE constraint_type = 'PRIMARY KEY' AND table_schema = 'public'
+           AND table_name <> 'TablaY') AS pks,
+       (SELECT count(*) FROM information_schema.table_constraints
+         WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public') AS fks
+FROM information_schema.tables
+WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+  AND table_name <> 'TablaY';
+```
+
+**Resultado:** `tablas = 13`, `pks = 13`, `fks = 12`.
+
+![Punto 2 — PostgreSQL: estructura restaurada](capturas/p1-punto-02-postgresql.png)
+
 **Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio.
+
+**Capturas:** este punto se respalda con evidencia textual (los volcados de catálogo), no con capturas de pantalla.
 
 ### Punto 3. Verificación de tablas
 
-**Descripción de pasos:** se consultó el catálogo de cada motor para comprobar que existían las 13 tablas del modelo.
+**Descripción de pasos:** Se consultó el catálogo de cada motor para comprobar que existían las 13 tablas del modelo.
 
 | Motor | Consulta | Resultado |
 |---|---|---:|
@@ -103,19 +133,41 @@ Cada punto requiere descripción detallada de pasos y capturas.
 
 Las 13 tablas son: `cargo`, `categoria`, `complemento`, `contrato`, `deduccion`, `detalle_deduccion`, `detalle_percepcion`, `empleado`, `nomina`, `ocupacion_cargo`, `puesto`, `puesto_complemento` y `tramo_deduccion`.
 
+**Resultado observado:** los tres motores devuelven 13 al contar sus tablas base, y el listado coincide con las 13 tablas del modelo.
+
 **Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio. Las capturas del punto 1 muestran el resultado 13 en Oracle y SQL Server; la de pgAdmin muestra las 13 tablas en el árbol.
+
+**Captura (PostgreSQL):** listado de las 13 tablas del modelo. También se excluye `TablaY`, que pertenece a la segunda parte.
+
+```sql
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+  AND table_name <> 'TablaY'
+ORDER BY table_name;
+```
+
+**Resultado:** 13 filas, de `cargo` a `tramo_deduccion`.
+
+![Punto 3 — PostgreSQL: 13 tablas](capturas/p1-punto-03-postgresql.png)
 
 ### Punto 4. Modelo relacional
 
 **Descripción de pasos:** Regenerar el modelo con el cliente de cada motor y comparar estructura y relaciones.
 
-**Desarrollo:** el modelo original ya está disponible. El DER de la Actividad 1 (13 entidades) y el modelo relacional de la Actividad 2 coinciden con las 13 tablas, 12 FK y cardinalidades de las tres copias restauradas. El cotejo se realizó contra las tres copias restauradas.
+**Desarrollo:** El modelo original ya está disponible. El DER de la Actividad 1 (13 entidades) y el modelo relacional de la Actividad 2 coinciden con las 13 tablas, 12 FK y cardinalidades de las tres copias restauradas. El cotejo se realizó contra las tres copias restauradas.
+
+| Motor | Herramienta | Ruta usada | Resultado |
+|---|---|---|---|
+| PostgreSQL | pgAdmin 4 — ERD Tool | `Object → ERD For Database` | ERD con las 13 tablas |
+| Oracle | SQL Developer — Data Modeler | `File → Data Modeler → Import → Data Dictionary` | ERD con las 13 tablas, columnas, claves y relaciones |
+| SQL Server | DBeaver Community — ER Diagram | — | ERD con las 13 tablas del esquema `dbo` |
+
+SSMS no existe para Linux: en SQL Server el ERD se generó con DBeaver Community, la misma alternativa usada en la Actividad 2.
 
 **Diferencia observada:** dos políticas `ON DELETE` no coinciden entre motores. En `ocupacion_cargo.dni_empleado`, PostgreSQL usa `CASCADE` y Oracle/SQL Server `NO ACTION`; en `puesto_complemento.id_complemento`, PostgreSQL usa `RESTRICT` y Oracle/SQL Server `CASCADE`. Las relaciones existen en los tres motores; se documenta la diferencia y no se modificó ninguna copia.
 
-- PostgreSQL: pgAdmin → **ERD Tool** (`Object → ERD For Database`). **Generado y capturado** con las 13 tablas.
-- Oracle: SQL Developer → **Data Modeler** (`File → Data Modeler → Import → Data Dictionary`). **Generado y capturado** con las 13 tablas.
-- SQL Server: DBeaver Community → **ER Diagram**. **Generado y capturado** con las 13 tablas. SSMS no existe para Linux; DBeaver es la alternativa usada también en la Actividad 2.
+**Resultado observado:** los tres ERD se generaron y capturaron con las 13 tablas; el cotejo coincide en entidades, tablas, 12 FK y cardinalidades.
 
 #### PostgreSQL
 
@@ -123,13 +175,13 @@ Las 13 tablas son: `cargo`, `categoria`, `complemento`, `contrato`, `deduccion`,
 
 #### Oracle
 
-Generado con **SQL Developer Data Modeler** mediante la importación del diccionario de datos del esquema `7502220042_2_nomina`. Muestra las 13 tablas, sus columnas, claves y relaciones.
+Generado con **SQL Developer Data Modeler** mediante la importación del diccionario de datos del esquema `7502220042_2_nomina`.
 
 ![Punto 4 — ERD Oracle](capturas/p1-punto-04-oracle-erd.png)
 
 #### SQL Server
 
-Generado con **DBeaver Community** (ER Diagram) sobre las 13 tablas del esquema `dbo`. SSMS no está disponible para Linux; DBeaver es la alternativa usada en la Actividad 2.
+Generado con **DBeaver Community** (ER Diagram) sobre las 13 tablas del esquema `dbo`.
 
 ![Punto 4 — ERD SQL Server](capturas/p1-punto-04-sqlserver-erd.png)
 
@@ -137,7 +189,7 @@ Generado con **DBeaver Community** (ER Diagram) sobre las 13 tablas del esquema 
 
 **Descripción de pasos:** Volver a crear el usuario con las mismas credenciales de la Actividad 2.
 
-**Desarrollo:** el usuario es `7502220042_darias`. Las contraseñas están documentadas en las capturas de la Actividad 2 (PostgreSQL p. 6; Oracle p. 5; SQL Server p. 5) y no se transcriben en el proyecto.
+**Desarrollo:** El usuario es `7502220042_darias`. Las contraseñas están documentadas en las capturas de la Actividad 2 (PostgreSQL p. 6; Oracle p. 5; SQL Server p. 5) y no se transcriben en el proyecto.
 
 En las tres sentencias de creación que siguen la contraseña se escribe como `<contraseña>`: es un marcador, no la clave real. Las capturas muestran la conexión abierta con el usuario creado y la base de trabajo, no la sentencia de creación.
 
@@ -215,7 +267,7 @@ La consulta devuelve el login de la sesión y la base activa. El login es el cre
 
 **Descripción de pasos:** Desconectar y volver a conectar con esas credenciales.
 
-**Desarrollo:** reconexión verificada en el cliente en los tres motores (`reconexion=7502220042_darias@…`); las capturas de PostgreSQL, Oracle y SQL Server muestran el cliente después de reconectar.
+**Desarrollo:** Reconexión verificada en el cliente en los tres motores; las capturas de PostgreSQL, Oracle y SQL Server muestran el cliente después de reconectar.
 
 #### PostgreSQL
 
@@ -265,7 +317,7 @@ El resultado confirma que la segunda conexión no fue con `sa` ni sobre otra bas
 
 **Descripción de pasos:** Mostrar las bases de datos de `usuario_xyz`.
 
-**Desarrollo:** consulta de catálogo ejecutada y capturada en los tres motores. En Oracle el equivalente se expresa como PDB y esquema, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
+**Desarrollo:** Consulta de catálogo ejecutada y capturada en los tres motores. En Oracle el equivalente se expresa como PDB y esquema, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
 
 #### PostgreSQL
 
@@ -287,7 +339,7 @@ ORDER BY 1;
 | 3 | `template0` |
 | 4 | `template1` |
 
-La primera es la base de la copia de prueba, donde está la tabla NOMINA; las otras tres son las bases del sistema que la instalación deja accesibles. La consulta filtra por `has_database_privilege(..., 'CONNECT')`, así que solo aparecen las bases a las que el usuario puede conectarse.
+La primera es la base de la copia de prueba, donde están las 13 tablas de NOMINA; las otras tres son las bases del sistema que la instalación deja accesibles. La consulta filtra por `has_database_privilege(..., 'CONNECT')`, así que solo aparecen las bases a las que el usuario puede conectarse.
 
 ![Punto 7 — PostgreSQL: bases de datos accesibles para el usuario](capturas/p1-punto-07-postgresql.png)
 
@@ -338,7 +390,7 @@ ORDER BY name;
 | 3 | `msdb` |
 | 4 | `tempdb` |
 
-La primera es la base de la copia de prueba, donde está la tabla NOMINA; las otras tres son las bases del sistema que la instalación deja accesibles. La consulta filtra con `HAS_DBACCESS(name) = 1`, así que solo aparecen las bases a las que el usuario puede conectarse.
+La primera es la base de la copia de prueba, donde están las 13 tablas de NOMINA; las otras tres son las bases del sistema que la instalación deja accesibles. La consulta filtra con `HAS_DBACCESS(name) = 1`, así que solo aparecen las bases a las que el usuario puede conectarse.
 
 La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQL Server` sobre la base `7502220042_2_nomina`; el resultado tiene 4 filas.
 
@@ -348,7 +400,7 @@ La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQ
 
 **Descripción de pasos:** Instalar al menos tres IDE y conectarlos a los tres motores usados, con una conexión por IDE (tres en total).
 
-**Desarrollo:** se usan tres IDE de la lista de la guía, uno por motor:
+**Desarrollo:** Se usan tres IDE de la lista de la guía, uno por motor:
 
 | IDE | Versión | Motor asignado | Conector |
 |---|---|---|---|
@@ -386,7 +438,7 @@ IntelliJ Community no incluye las herramientas de base de datos de Ultimate, as�
 
 ## Segunda parte (70 %)
 
-Formato por ejercicio: **A)** texto SQL, **B)** explicación, **C)** recorte de pantalla del editor y resultado. **Alcance:** la primera parte se documenta en los tres motores; la segunda parte se resuelve en uno de ellos. Las capturas 1–69 están hechas con un cliente GUI web. Los 69 ejercicios están ejecutados y capturados.
+Formato por ejercicio: **A)** texto SQL, **B)** explicación, **C)** recorte de pantalla del editor y resultado. **Alcance:** la primera parte se documenta en los tres motores; la segunda parte se resuelve en uno de ellos (PostgreSQL). Las capturas de los ejercicios 1–69 se tomaron con un cliente gráfico (GUI) conectado a la copia de prueba, y los 69 ejercicios están ejecutados y capturados.
 
 **Nota de orden de ejecución:** el orden real no fue 1→69. Los ejercicios 58–65 se ejecutaron antes que 40–57 y algunas consultas de solo lectura se repitieron al final; por eso la barra lateral de algunas capturas puede mostrar `TablaY` o valores del estado final. Los `UPDATE` conservan su `RETURNING *` con la fila modificada.
 
@@ -431,11 +483,7 @@ ORDER BY id_detalle_percepcion;
 
 **Resultado obtenido:** 1 fila: Beca académica, 250.00, id_nomina 1.
 
-**Verificación posterior:**
-
-```sql
-La propia consulta es la verificación; al final de la serie devolvería 6 filas.
-```
+**Verificación posterior:** la propia consulta es la verificación; al final de la serie devolvería 6 filas.
 
 **C. Captura:** ![Ejercicio 2](capturas/p2-ejercicio-02.png)
 
@@ -488,11 +536,7 @@ ORDER BY id_nomina;
 
 **Resultado obtenido:** 5 filas, ids 1–5.
 
-**Verificación posterior:**
-
-```sql
-La propia consulta es la verificación.
-```
+**Verificación posterior:** la propia consulta es la verificación.
 
 **C. Captura:** ![Ejercicio 4](capturas/p2-ejercicio-04.png)
 
@@ -549,15 +593,13 @@ FROM public.detalle_percepcion
 ORDER BY id_detalle_percepcion;
 ```
 
-**B. Explicación:** se usan dos consultas independientes, como pide el enunciado. La primera muestra las cinco nóminas insertadas en el ejercicio 3; la segunda, los seis detalles insertados en los ejercicios 1 y 5. No se unen en una sola consulta porque el punto exige instrucciones separadas.
+**B. Explicación:** Se usan dos consultas independientes, como pide el enunciado. La primera muestra las cinco nóminas insertadas en el ejercicio 3; la segunda, los seis detalles insertados en los ejercicios 1 y 5. No se unen en una sola consulta porque el punto exige instrucciones separadas.
 
 **Resultado obtenido:** 5 filas en `nomina` (ids 1–5) y 6 filas en `detalle_percepcion` (ids 1–6).
 
 **C. Captura (consulta 1):** ![Ejercicio 6 — nomina](capturas/p2-ejercicio-06-nomina.png)
 
 **C. Captura (consulta 2):** ![Ejercicio 6 — detalle](capturas/p2-ejercicio-06-detalle.png)
-
-Las capturas son de un cliente GUI web contra `7502220042_2_nomina`; no se editó el resultado.
 
 ### Ejercicio 7. Insertar en TablaX al menos 15 registros usando el formato de inserción múltiple de SQL
 
@@ -928,7 +970,7 @@ VALUES
      2000.00, 200.00, 1800.00, NULL);
 ```
 
-**B. Explicación:** inserta una fila completa con la fecha `29-02-2023`. El 2023 no es bisiesto, así que la fecha no existe.
+**B. Explicación:** Inserta una fila completa con la fecha `29-02-2023`. El 2023 no es bisiesto, así que la fecha no existe.
 
 **Resultado obtenido:** ERROR: `date/time field value out of range: "29-02-2023"`. No se insertó ninguna fila.
 
@@ -942,7 +984,7 @@ VALUES
 SELECT * FROM public.nomina ORDER BY id_nomina;
 ```
 
-**B. Explicación:** muestra el contenido completo tras el intento fallido del 28; debe seguir en 21 filas.
+**B. Explicación:** Muestra el contenido completo tras el intento fallido del 28; debe seguir en 21 filas.
 
 **Resultado obtenido:** 21 filas.
 
@@ -1017,7 +1059,7 @@ VALUES
 RETURNING *;
 ```
 
-**B. Explicación:** repite la inserción con cada uno de los siete formatos. No se agrupan en una sola sentencia porque un formato inválido abortaría la sentencia completa y no se podría registrar el resultado de cada fecha; por eso se prueban uno por uno.
+**B. Explicación:** Repite la inserción con cada uno de los siete formatos. No se agrupan en una sola sentencia porque un formato inválido abortaría la sentencia completa y no se podría registrar el resultado de cada fecha; por eso se prueban uno por uno.
 
 **Resultado obtenido:**
 
@@ -1033,7 +1075,35 @@ RETURNING *;
 
 Con `DateStyle = ISO, MDY` se aceptan `MM/DD/YYYY` y `MM-DD-YYYY`; las fechas imposibles dan error de rango y los separadores mezclados, error de sintaxis.
 
-**C. Capturas:** ![30a](capturas/p2-ejercicio-30a.png) ![30b](capturas/p2-ejercicio-30b.png) ![30c](capturas/p2-ejercicio-30c.png) ![30d](capturas/p2-ejercicio-30d.png) ![30e](capturas/p2-ejercicio-30e.png) ![30f](capturas/p2-ejercicio-30f.png) ![30g](capturas/p2-ejercicio-30g.png)
+**C. Capturas:** una por intento, en el orden de la tabla anterior.
+
+**30a — `23-12-10`**
+
+![Ejercicio 30a](capturas/p2-ejercicio-30a.png)
+
+**30b — `01/14/2023`**
+
+![Ejercicio 30b](capturas/p2-ejercicio-30b.png)
+
+**30c — `-10/08/2023`**
+
+![Ejercicio 30c](capturas/p2-ejercicio-30c.png)
+
+**30d — `12/30-2023`**
+
+![Ejercicio 30d](capturas/p2-ejercicio-30d.png)
+
+**30e — `12-30-2023`**
+
+![Ejercicio 30e](capturas/p2-ejercicio-30e.png)
+
+**30f — `2023-50-20`**
+
+![Ejercicio 30f](capturas/p2-ejercicio-30f.png)
+
+**30g — `2023-06-21`**
+
+![Ejercicio 30g](capturas/p2-ejercicio-30g.png)
 
 ### Ejercicio 31. Mostrar el contenido completo de TablaX
 
@@ -1043,7 +1113,7 @@ Con `DateStyle = ISO, MDY` se aceptan `MM/DD/YYYY` y `MM-DD-YYYY`; las fechas im
 SELECT * FROM public.nomina ORDER BY id_nomina;
 ```
 
-**B. Explicación:** muestra el contenido completo después de las tres fechas aceptadas.
+**B. Explicación:** Muestra el contenido completo después de las tres fechas aceptadas.
 
 **Resultado obtenido:** 24 filas: las 21 anteriores más ids 38, 41 y 43.
 
@@ -1161,9 +1231,9 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 
 **C. Captura:** ![Ejercicio 39](capturas/p2-ejercicio-39.png)
 
-### Preparación de datos de prueba (ejercicios 40–56)
+### Datos de prueba para los ejercicios 40–56
 
-Los ejercicios 40 a 56 filtran por la columna `dni_empleado`, así que antes de ejecutarlos se cargaron cuatro empleados y se ligaron las nóminas 21–25 a esos DNI. Son **datos de prueba**, no información de personas reales.
+La mayoría de los ejercicios 40 a 56 filtran por la columna `dni_empleado`, así que antes de ejecutarlos se cargaron cuatro empleados y se ligaron las nóminas 21–25 a esos DNI. Son **datos de prueba**, no información de personas reales.
 
 ```sql
 INSERT INTO public.empleado
@@ -1354,8 +1424,6 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 
 **C. Captura:** ![Ejercicio 51](capturas/p2-ejercicio-51.png)
 
-**Nota de evidencia:** la fila modificada por el ejercicio 52 se ve en su captura, donde el `UPDATE` usa `RETURNING *`. El `SELECT` de esta captura puede no reflejar el cambio si el cliente conserva en pantalla un resultado anterior.
-
 ### Ejercicio 52. Cambiar columna1 y columna2 en TablaX solo en registros cuyo valor en columnaX contenga ABCD
 
 **A. Instrucción SQL:**
@@ -1384,7 +1452,7 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 
 **C. Captura:** ![Ejercicio 53](capturas/p2-ejercicio-53.png)
 
-**Nota:** el `UPDATE` del ejercicio 52 muestra la fila modificada con `RETURNING *`; esta captura es un `SELECT` y puede no reflejar el cambio.
+**Nota de evidencia:** la fila modificada por el ejercicio 52 se ve en su propia captura, donde el `UPDATE` usa `RETURNING *`. Los `SELECT` de los ejercicios 51 y 53 pueden no reflejar ese cambio si el cliente conserva en pantalla un resultado anterior.
 
 ### Ejercicio 54. Cambiar columna1 y columna2 en TablaX solo en registros cuyo valor en columnaX sea igual a NULL
 
@@ -1478,7 +1546,7 @@ CREATE TABLE public."TablaY" (
 SELECT * FROM public."TablaY" ORDER BY id;
 ```
 
-**B. Explicación:** muestra la tabla recién creada; debe estar vacía.
+**B. Explicación:** Muestra la tabla recién creada; debe estar vacía.
 
 **Resultado obtenido:** 0 filas.
 
@@ -1501,7 +1569,7 @@ VALUES
 RETURNING *;
 ```
 
-**B. Explicación:** inserta los seis registros de la tabla de datos. Se omiten `id`, `definitiva` y `promedio`; el primero lo asigna la secuencia y los otros quedan NULL hasta el ejercicio 62.
+**B. Explicación:** Inserta los seis registros de la tabla de datos. Se omiten `id`, `definitiva` y `promedio`; el primero lo asigna la secuencia y los otros quedan NULL hasta el ejercicio 62.
 
 **Resultado obtenido:** 6 filas, ids 1–6.
 
@@ -1515,7 +1583,7 @@ RETURNING *;
 SELECT * FROM public."TablaY" ORDER BY id;
 ```
 
-**B. Explicación:** muestra los seis registros insertados.
+**B. Explicación:** Muestra los seis registros insertados.
 
 **Resultado obtenido:** 6 filas.
 
@@ -1532,7 +1600,7 @@ UPDATE public."TablaY" SET
 RETURNING *;
 ```
 
-**B. Explicación:** calcula `definitiva` con pesos 20 %, 20 % y 60 %, y `promedio` como la media de las tres notas. Los NULL se tratan como 0, que es lo que reflejan los ejemplos del documento (`1,NULL,NULL → 0.2 / 0.333`).
+**B. Explicación:** Calcula `definitiva` con pesos 20 %, 20 % y 60 %, y `promedio` como la media de las tres notas. Los NULL se tratan como 0, que es lo que reflejan los ejemplos del documento (`1,NULL,NULL → 0.2 / 0.333`).
 
 **Resultado obtenido:** 6 filas. Valores: 0.200/0.333, 0.400/0.666, 1.000/1.000, 0.800/1.333, 1.700/2.833, 4.700/4.500.
 
@@ -1548,7 +1616,7 @@ Los valores calculados se ven en la captura del ejercicio 63, que muestra la tab
 SELECT * FROM public."TablaY" ORDER BY id;
 ```
 
-**B. Explicación:** comprueba los cálculos del ejercicio 62.
+**B. Explicación:** Comprueba los cálculos del ejercicio 62.
 
 **Resultado obtenido:** 6 filas con `definitiva` y `promedio` calculados.
 
@@ -1567,7 +1635,7 @@ UPDATE public."TablaY" SET
 RETURNING *;
 ```
 
-**B. Explicación:** convierte a mayúscula sostenida las cuatro columnas de texto.
+**B. Explicación:** Convierte a mayúscula sostenida las cuatro columnas de texto.
 
 **Resultado obtenido:** 6 filas; se conservan los acentos (`PRÁCTICAMENTE`, `SUSTENTACIÓN`).
 
@@ -1581,7 +1649,7 @@ RETURNING *;
 SELECT * FROM public."TablaY" ORDER BY id;
 ```
 
-**B. Explicación:** muestra el contenido final con los textos en mayúscula.
+**B. Explicación:** Muestra el contenido final con los textos en mayúscula.
 
 **Resultado obtenido:** 6 filas.
 
@@ -1647,5 +1715,10 @@ SELECT * FROM public."TablaY" ORDER BY id;
 
 ## Conclusión
 
-La actividad recorrió las tres operaciones DML sobre una copia restaurada de la base NOMINA. Los INSERT mostraron las formas completa, parcial y múltiple, y los rechazos por PK duplicada, FK inexistente, NOT NULL, tipo y fecha inválida. Los UPDATE permitieron comprobar filtros por PK, por rangos, por texto (`BETWEEN`, `LIKE`) y por NULL, además de la conversión de tipos y el efecto de `ON UPDATE CASCADE`. Los DELETE evidenciaron el borrado de una fila con cascada y el borrado masivo. Las capturas, la restauración posterior y las verificaciones de catálogo dejan el estado de la copia de prueba documentado y reproducible.
+La actividad recorrió las tres operaciones DML sobre una copia restaurada de la base NOMINA.
+
+- **INSERT:** se practicaron las formas completa, parcial y múltiple, y se registraron los rechazos por PK duplicada, FK inexistente, NOT NULL, tipo y fecha inválida.
+- **UPDATE:** se comprobaron los filtros por PK, por rangos, por texto (`BETWEEN`, `LIKE`) y por NULL, además de la conversión de tipos y el efecto de `ON UPDATE CASCADE`.
+- **DELETE:** se evidenció el borrado de una fila con cascada y el borrado masivo.
+- **Cierre:** las capturas, la restauración posterior y las verificaciones de catálogo dejan el estado de la copia de prueba documentado y reproducible.
 

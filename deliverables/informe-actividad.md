@@ -350,15 +350,33 @@ La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQ
 
 **Desarrollo:** se usan tres IDE de la lista de la guía, uno por motor:
 
-| IDE | Versión | Motor asignado |
-|---|---|---|
-| Visual Studio Code | 1.131.0 | PostgreSQL |
-| IntelliJ IDEA Community | 2026.3 | Oracle |
-| NetBeans | 30-1 | SQL Server |
+| IDE | Versión | Motor asignado | Conector |
+|---|---|---|---|
+| NetBeans | 30-1 | PostgreSQL | `postgresql-42.5.4.jar`, incluido en el IDE |
+| Visual Studio Code | 1.131.0 | SQL Server | Extensión oficial `ms-mssql.mssql` |
+| IntelliJ IDEA Community | 2026.3 | Oracle | Plugin *Database Navigator* + `ojdbc11.jar` |
 
 Cada IDE abre una conexión al motor que le corresponde con el usuario `7502220042_darias`, de modo que las tres conexiones cubren los tres motores. DBeaver no se usa en este punto: es un cliente de base de datos, no un IDE.
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 8]`
+#### NetBeans → PostgreSQL
+
+NetBeans incluye el controlador de PostgreSQL (`ide/modules/ext/postgresql-42.5.4.jar`), así que no requiere descargas adicionales. Se registró la conexión `jdbc:postgresql://127.0.0.1:55432/7502220042_2_nomina` con el usuario `7502220042_darias` y se ejecutó la consulta de verificación en el editor SQL del IDE.
+
+**Resultado obtenido:** `tablas = 13`, con el mensaje «Execution finished after 0.116 s, no errors occurred».
+
+![Punto 8 — NetBeans conectado a PostgreSQL](capturas/p1-punto-08-netbeans-postgresql.png)
+
+#### Visual Studio Code → SQL Server
+
+Requiere la extensión oficial *SQL Server (mssql)* de Microsoft, que aporta el controlador del motor.
+
+**Captura:** `[CAPTURA PENDIENTE: punto 8 — VS Code/SQL Server]`
+
+#### IntelliJ IDEA Community → Oracle
+
+IntelliJ Community no incluye las herramientas de base de datos de Ultimate; se usa el plugin *Database Navigator* con el controlador JDBC `ojdbc11.jar`, tomado de la instalación de SQL Developer.
+
+**Captura:** `[CAPTURA PENDIENTE: punto 8 — IntelliJ/Oracle]`
 
 <div style="page-break-before: always;"></div>
 

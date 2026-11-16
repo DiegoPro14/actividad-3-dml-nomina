@@ -90,12 +90,40 @@ Cada punto requiere descripción detallada de pasos y capturas. Cuando un punto 
 2. SQL Server 2022 no podía restaurarlo; se instaló SQL Server 2025 y se ejecutó `RESTORE DATABASE`.
 3. Resultado: base `7502220042_2_nomina` con 13 tablas en `dbo`.
 
+La estructura restaurada se comprueba contando tablas, claves primarias y claves foráneas del catálogo:
+
+```sql
+SELECT (SELECT COUNT(*) FROM sys.tables) AS tablas,
+       (SELECT COUNT(*) FROM sys.key_constraints WHERE type = 'PK') AS pks,
+       (SELECT COUNT(*) FROM sys.foreign_keys) AS fks;
+```
+
+**Resultado:** `13 / 13 / 12`.
+
+![Punto 2 — SQL Server: estructura restaurada](capturas/p1-punto-02-sqlserver.png)
+
 **Oracle**
 
 1. Respaldo: `BACKUP_7502220042_2_NOMINA.DMP`.
 2. Se creó el PDB `NOMINAPDB`, se actualizó a TSTZ 45 y se usó `_datapump_bypass_tstz_check=TRUE` para superar `ORA-39405`.
 3. Se creó el tablespace `USERS`, el usuario `"7502220042_2_nomina"` y se importó con `impdp`. El único error fue `ORA-31684` porque el usuario ya existía; no afectó las tablas.
 4. Resultado: 13 tablas, 0 filas.
+
+Las tablas pertenecen al esquema `7502220042_2_nomina`, así que se consultan en `all_tables` filtrando por propietario. `user_tables` no sirve aquí: solo lista las tablas del usuario conectado.
+
+```sql
+SELECT (SELECT COUNT(*) FROM all_tables
+         WHERE owner = '7502220042_2_nomina') AS tablas,
+       (SELECT COUNT(*) FROM all_constraints
+         WHERE owner = '7502220042_2_nomina' AND constraint_type = 'P') AS pks,
+       (SELECT COUNT(*) FROM all_constraints
+         WHERE owner = '7502220042_2_nomina' AND constraint_type = 'R') AS fks
+FROM dual;
+```
+
+**Resultado:** `13 / 13 / 12`.
+
+![Punto 2 — Oracle: estructura restaurada](capturas/p1-punto-02-oracle.png)
 
 **Resultado observado:** las tres copias quedaron con las 13 tablas del modelo. PostgreSQL reportó además 13 PK y 12 FK; PostgreSQL y Oracle quedaron con 0 filas, porque los respaldos no traían datos.
 
@@ -117,9 +145,7 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
 
 ![Punto 2 — PostgreSQL: estructura restaurada](capturas/p1-punto-02-postgresql.png)
 
-**Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio.
-
-**Capturas:** este punto se respalda con evidencia textual (los volcados de catálogo), no con capturas de pantalla.
+**Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio, y las capturas de los tres clientes con la estructura restaurada.
 
 ### Punto 3. Verificación de tablas
 
@@ -150,6 +176,28 @@ ORDER BY table_name;
 **Resultado:** 13 filas, de `cargo` a `tramo_deduccion`.
 
 ![Punto 3 — PostgreSQL: 13 tablas](capturas/p1-punto-03-postgresql.png)
+
+**Captura (SQL Server):** listado del catálogo del motor.
+
+```sql
+SELECT name FROM sys.tables ORDER BY name;
+```
+
+**Resultado:** 13 filas, de `cargo` a `tramo_deduccion`.
+
+![Punto 3 — SQL Server: 13 tablas](capturas/p1-punto-03-sqlserver.png)
+
+**Captura (Oracle):** listado del diccionario de datos del esquema asignado.
+
+```sql
+SELECT table_name FROM all_tables
+WHERE owner = '7502220042_2_nomina'
+ORDER BY table_name;
+```
+
+**Resultado:** 13 filas, de `CARGO` a `TRAMO_DEDUCCION` (Oracle guarda los identificadores en mayúsculas).
+
+![Punto 3 — Oracle: 13 tablas](capturas/p1-punto-03-oracle.png)
 
 ### Punto 4. Modelo relacional
 

@@ -98,12 +98,20 @@ Las 13 tablas son: `cargo`, `categoria`, `complemento`, `contrato`, `deduccion`,
 **Diferencia observada:** dos políticas `ON DELETE` no coinciden entre motores. En `ocupacion_cargo.dni_empleado`, PostgreSQL usa `CASCADE` y Oracle/SQL Server `NO ACTION`; en `puesto_complemento.id_complemento`, PostgreSQL usa `RESTRICT` y Oracle/SQL Server `CASCADE`. Las relaciones existen en los tres motores; se documenta la diferencia y no se modificó ninguna copia.
 
 - PostgreSQL: pgAdmin → **ERD Tool** (`Object → ERD For Database`). **Generado y capturado** con las 13 tablas.
-- Oracle: SQL Developer → **Data Modeler** (pendiente de generar y capturar).
+- Oracle: SQL Developer → **Data Modeler** (`File → Data Modeler → Import → Data Dictionary`). **Generado y capturado** con las 13 tablas.
 - SQL Server: SSMS → **Database Diagrams**. SSMS no existe para Linux; alternativa prevista: DBeaver Community 26.2, la misma herramienta usada en la Actividad 2.
+
+#### PostgreSQL
 
 ![Punto 4 — ERD PostgreSQL](capturas/p1-punto-04-postgresql-erd.png)
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 4, Oracle y SQL Server]`
+#### Oracle
+
+Generado con **SQL Developer Data Modeler** mediante la importación del diccionario de datos del esquema `7502220042_2_nomina`. Muestra las 13 tablas, sus columnas, claves y relaciones.
+
+![Punto 4 — ERD Oracle](capturas/p1-punto-04-oracle-erd.png)
+
+**Captura requerida:** `[CAPTURA PENDIENTE: punto 4, SQL Server]`
 
 ### Punto 5. Usuario `usuario_xyz`
 
@@ -119,15 +127,55 @@ La captura muestra el servidor `NOMINA actividad` registrado en pgAdmin 4 y una 
 
 ![Punto 5 — PostgreSQL: conexión real con el usuario creado](capturas/p1-punto-05-postgresql.png)
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 5, Oracle y SQL Server]`
+#### Oracle
+
+La captura corresponde a SQL Developer con la conexión `NOMINA actividad Oracle` abierta. En la hoja de trabajo se ejecutó:
+
+```sql
+SELECT USER AS usuario,
+       SYS_CONTEXT('USERENV', 'CON_NAME') AS pdb
+FROM dual;
+```
+
+**Resultado obtenido:** una fila, con `USUARIO = 7502220042_darias` y `PDB = NOMINAPDB`.
+
+La consulta devuelve el usuario de la sesión y el contenedor donde se abrió. El usuario es el creado para la actividad y el contenedor es el PDB de trabajo, no `CDB$ROOT`: la sesión no quedó abierta con una cuenta de administración ni sobre el contenedor raíz.
+
+![Punto 5 — Oracle: conexión con el usuario de la actividad en el PDB NOMINAPDB](capturas/p1-punto-05-oracle.png)
+
+**Captura requerida:** `[CAPTURA PENDIENTE: punto 5, SQL Server]`
 
 ### Punto 6. Reconexión con `usuario_xyz`
 
 **Descripción de pasos:** Desconectar y volver a conectar con esas credenciales.
 
-**Desarrollo:** reconexión verificada por CLI en los tres motores (`reconexion=7502220042_darias@…`). Falta la captura GUI.
+**Desarrollo:** reconexión verificada por CLI en los tres motores (`reconexion=7502220042_darias@…`) y capturada por GUI en PostgreSQL y en Oracle. Falta la captura de SQL Server.
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 6]`
+#### PostgreSQL
+
+Se cerró la sesión abierta sobre el servidor `NOMINA actividad` y se volvió a conectar con las mismas credenciales. Tras la reconexión se ejecutó:
+
+```sql
+SELECT current_user, current_database();
+```
+
+**Resultado obtenido:** `7502220042_darias` y `7502220042_2_nomina`.
+
+El resultado confirma que la segunda conexión no fue con el usuario administrador ni sobre otra base: la sesión reconectada quedó como `7502220042_darias` sobre la base `7502220042_2_nomina`, la copia de prueba.
+
+![Punto 6 — PostgreSQL: reconexión con el usuario de la actividad](capturas/p1-punto-06-postgresql.png)
+
+#### Oracle
+
+Se cerró la conexión `NOMINA actividad Oracle` y se abrió de nuevo con las mismas credenciales. La primera captura muestra la hoja de trabajo sin resultado y el árbol de objetos sin desplegar: no hay sesión activa sobre esa conexión.
+
+![Punto 6 — Oracle: conexión cerrada](capturas/p1-punto-06-oracle-desconectado.png)
+
+La segunda captura corresponde a la sesión ya reconectada. Se ejecutó `SELECT USER FROM dual;` y el valor devuelto fue `7502220042_darias`; además, el árbol de la conexión aparece desplegado con las categorías de objetos de la base.
+
+![Punto 6 — Oracle: reconectado con el usuario de la actividad](capturas/p1-punto-06-oracle-reconectado.png)
+
+**Captura requerida:** `[CAPTURA PENDIENTE: punto 6, SQL Server]`
 
 <div style="page-break-before: always;"></div>
 
@@ -135,7 +183,7 @@ La captura muestra el servidor `NOMINA actividad` registrado en pgAdmin 4 y una 
 
 **Descripción de pasos:** Mostrar las bases de datos de `usuario_xyz`.
 
-**Desarrollo:** en PostgreSQL la consulta de catálogo ya está ejecutada y capturada. En Oracle y SQL Server todavía falta la consulta y su captura. En Oracle el equivalente se expresará como PDB/esquemas accesibles, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
+**Desarrollo:** consulta de catálogo ejecutada y capturada en PostgreSQL y en Oracle; falta la de SQL Server. En Oracle el equivalente se expresa como PDB y esquema, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
 
 #### PostgreSQL
 
@@ -163,7 +211,32 @@ La primera es la base de la copia de prueba, donde está la tabla NOMINA; las ot
 
 La captura corresponde a pgAdmin 4 con la conexión `7502220042_2_nomina/7502220042_darias@NOMINA actividad`; el resultado tiene 4 filas.
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 7, Oracle y SQL Server]`
+#### Oracle
+
+En Oracle un usuario no tiene un conjunto de bases propias como en PostgreSQL o SQL Server: los objetos viven en esquemas dentro de un PDB. El equivalente práctico de “bases de datos del usuario” son dos datos: el PDB donde se abrió la sesión y el esquema cuyas tablas el usuario puede consultar.
+
+Consulta ejecutada:
+
+```sql
+SELECT 'PDB' AS dato, SYS_CONTEXT('USERENV','CON_NAME') AS valor FROM dual
+UNION ALL
+SELECT 'TABLAS_NOMINA', TO_CHAR(COUNT(*)) FROM all_tables WHERE owner='7502220042_2_nomina';
+```
+
+**Resultado obtenido:**
+
+| DATO | VALOR |
+|---|---|
+| `PDB` | `NOMINAPDB` |
+| `TABLAS_NOMINA` | `13` |
+
+La primera fila indica que la sesión está en el PDB `NOMINAPDB`. La segunda cuenta en el diccionario las tablas del esquema `7502220042_2_nomina`, donde están los objetos de la copia de prueba: son 13, el mismo número de tablas verificado en el punto 3. `all_tables` solo muestra las tablas a las que el usuario tiene acceso, así que el resultado también confirma que la sesión alcanza ese esquema.
+
+La captura muestra la hoja de trabajo de SQL Developer y, en `Query Result`, las dos filas con los valores anteriores.
+
+![Punto 7 — Oracle: PDB de la sesión y tablas del esquema](capturas/p1-punto-07-oracle.png)
+
+**Captura requerida:** `[CAPTURA PENDIENTE: punto 7, SQL Server]`
 
 ### Punto 8. IDE(s)
 

@@ -368,9 +368,11 @@ NetBeans incluye el controlador de PostgreSQL (`ide/modules/ext/postgresql-42.5.
 
 #### Visual Studio Code → SQL Server
 
-Requiere la extensión oficial *SQL Server (mssql)* de Microsoft, que aporta el controlador del motor.
+Se instaló la extensión oficial *SQL Server (mssql)* de Microsoft, que aporta el controlador del motor. La conexión `NOMINA SQL Server` apunta a `localhost,1433` con autenticación SQL y el usuario `7502220042_darias`; la base `7502220042_2_nomina` queda seleccionada en la barra de estado.
 
-**Captura:** `[CAPTURA PENDIENTE: punto 8 — VS Code/SQL Server]`
+**Resultado obtenido:** `usuario = 7502220042_darias`, `base = 7502220042_2_nomina`.
+
+![Punto 8 — VS Code conectado a SQL Server](capturas/p1-punto-08-vscode-sqlserver.png)
 
 #### IntelliJ IDEA Community → Oracle
 

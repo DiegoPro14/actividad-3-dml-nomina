@@ -6,11 +6,11 @@
 |---|---|
 | Universidad | Universidad de Cartagena (UdeC) |
 | Programa / Carrera | Ingeniería del software |
-| Asignatura / Semestre | Bases de Datos 1 (semestre no declarado en las fuentes) |
+| Asignatura / Semestre | Bases de Datos 1 — semestre 9 |
 | Nombre de la Actividad | Dominio de Sentencias DML: Guía Práctica de Manipulación de Datos en Entornos Multimotor |
 | Nombre del Estudiante | Diego Andres Arias Hernandez — código 7502220042 |
 | Nombre del Docente | John Carlos Arrieta Arrieta |
-| Fecha de Entrega | *Pendiente de completar* |
+| Fecha de Entrega | 15 de noviembre de 2026 |
 
 > Los datos de universidad, programa, estudiante y docente se tomaron de la Actividad 1 (páginas 1–2), recibida el 14/11/2026.
 
@@ -348,7 +348,15 @@ La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQ
 
 **Descripción de pasos:** Instalar al menos tres IDE y conectarlos a los tres motores usados, con una conexión por IDE (tres en total).
 
-**Desarrollo:** esta máquina ya tiene **VS Code**, **DBeaver** e **IntelliJ IDEA**. Queda configurar una conexión por IDE (tres en total), cubriendo los tres motores, y capturarlas.
+**Desarrollo:** se usan tres IDE de la lista de la guía, uno por motor:
+
+| IDE | Versión | Motor asignado |
+|---|---|---|
+| Visual Studio Code | 1.131.0 | PostgreSQL |
+| IntelliJ IDEA Community | 2026.3 | Oracle |
+| NetBeans | 30-1 | SQL Server |
+
+Cada IDE abre una conexión al motor que le corresponde con el usuario `7502220042_darias`, de modo que las tres conexiones cubren los tres motores. DBeaver no se usa en este punto: es un cliente de base de datos, no un IDE.
 
 **Captura requerida:** `[CAPTURA PENDIENTE: punto 8]`
 

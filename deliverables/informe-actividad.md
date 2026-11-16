@@ -42,7 +42,7 @@ div + h2 { page-break-before: avoid; }
 
 ## Primera parte (30 %)
 
-Cada punto requiere descripción detallada de pasos y capturas. Cuando un punto se respalda con evidencia textual y no con capturas, se indica expresamente en el propio punto.
+Cada punto incluye descripción de pasos, desarrollo, resultado observado y capturas de los tres motores.
 
 ### Punto 1. Clientes SQL GUI oficiales por cada motor
 
@@ -161,7 +161,7 @@ Las 13 tablas son: `cargo`, `categoria`, `complemento`, `contrato`, `deduccion`,
 
 **Resultado observado:** los tres motores devuelven 13 al contar sus tablas base, y el listado coincide con las 13 tablas del modelo.
 
-**Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio. Las capturas del punto 1 muestran el resultado 13 en Oracle y SQL Server; la de pgAdmin muestra las 13 tablas en el árbol.
+**Evidencia:** volcados de catálogo `postgresql-tablas.txt`, `sqlserver-tablas.txt` y `oracle-tablas.txt`, incluidos en el repositorio.
 
 **Captura (PostgreSQL):** listado de las 13 tablas del modelo. También se excluye `TablaY`, que pertenece a la segunda parte.
 

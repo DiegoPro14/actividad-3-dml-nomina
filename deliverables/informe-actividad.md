@@ -304,6 +304,8 @@ La captura muestra la hoja de trabajo de SQL Developer y, en `Query Result`, las
 
 Formato por ejercicio: **A)** texto SQL, **B)** explicación, **C)** recorte de pantalla del editor y resultado. **Alcance:** la primera parte se documenta en los tres motores; la segunda parte se resuelve en uno de ellos. Las capturas 1–69 están hechas con un cliente GUI web. Los 69 ejercicios están ejecutados y capturados.
 
+**Nota de orden de ejecución:** el orden real no fue 1→69. Los ejercicios 58–65 se ejecutaron antes que 40–57 y algunas consultas de solo lectura se repitieron al final; por eso la barra lateral de algunas capturas puede mostrar `TablaY` o valores del estado final. Los `UPDATE` conservan su `RETURNING *` con la fila modificada.
+
 ### Ejercicio 1. Insertar en TablaZ al menos un registro usando la forma de inserción completa de SQL
 
 **A. Instrucción SQL:**

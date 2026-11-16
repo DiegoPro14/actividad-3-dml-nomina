@@ -376,9 +376,11 @@ Se instaló la extensión oficial *SQL Server (mssql)* de Microsoft, que aporta 
 
 #### IntelliJ IDEA Community → Oracle
 
-IntelliJ Community no incluye las herramientas de base de datos de Ultimate; se usa el plugin *Database Navigator* con el controlador JDBC `ojdbc11.jar`, tomado de la instalación de SQL Developer.
+IntelliJ Community no incluye las herramientas de base de datos de Ultimate, así que se instaló el plugin *Database Navigator* y se usó el controlador JDBC `ojdbc11.jar`. La conexión `NOMINA Oracle` apunta a `localhost:1521` con el servicio `NOMINAPDB` y el usuario `"7502220042_darias"`; el nombre va entre comillas porque la cuenta se creó como identificador en minúsculas y, sin ellas, Oracle la convierte a mayúsculas y la rechaza con `ORA-01017`.
 
-**Captura:** `[CAPTURA PENDIENTE: punto 8 — IntelliJ/Oracle]`
+**Resultado obtenido:** `USER = 7502220042_darias`, «1 records - executed in 0 ms», con el esquema `7502220042_2_nomina` seleccionado.
+
+![Punto 8 — IntelliJ IDEA conectado a Oracle](capturas/p1-punto-08-intellij-oracle.png)
 
 <div style="page-break-before: always;"></div>
 

@@ -1,0 +1,49 @@
+Recaptura de los ejercicios 66–69 sobre el estado final
+Fecha: 2026-11-15 (hora local del equipo)
+Base: 7502220042_2_nomina — clúster <ruta-del-clúster>/pgdata, puerto 55432
+Cliente de captura: pgweb 0.17.0 en http://127.0.0.1:8081 (usuario nomina_rw)
+Navegador: agent-browser, sesión recapture-66-69, viewport 1440x900, recorte 1190x850+250+50
+
+Estado ANTES (verificado con psql -U ema):
+  nomina=24, detalle_percepcion=6, empleado=4, TablaY=6, detalle_deduccion=0
+  id_nomina=100 -> total_percepciones=2700.00, total_deducciones=270.00
+  id_nomina 21..25 -> 2800.00 / 280.00
+  detalle 6 -> nómina 100
+  secuencias: nomina=100/t, detalle_percepcion=6/t
+
+Ejecución en pgweb (pestaña Query, editor Ace custom_query, botón run):
+  66  DELETE FROM public.nomina WHERE id_nomina = 100 RETURNING *;  -> 1 fila (100, 5, 2024, 2700.00, 270.00, 1260.00, NULL)
+      Verificación: nomina=23, detalle=5, id100=0
+  67  SELECT * FROM public.nomina ORDER BY id_nomina;              -> "23 rows in 0 ms"; 2800/280 en 21..25, 2700/270 en 26..35
+  68  DELETE FROM public.nomina;                                   -> "Rows Affected 23"
+      Verificación: nomina=0, detalle=0, TablaY=6, empleado=4
+  69  SELECT * FROM public."TablaY" ORDER BY id;                   -> "6 rows in 0 ms"
+
+Restauración (solo nomina y detalle_percepcion, en una transacción):
+  psql -h <ruta-del-clúster>/socket -p 55432 -U ema -d 7502220042_2_nomina -1 \
+    -f sql/lote-05/datos-nomina.sql -f sql/lote-05/datos-detalle.sql \
+    -c "SELECT setval('public.nomina_id_nomina_seq',100,true);" \
+    -c "SELECT setval('public.detalle_percepcion_id_detalle_percepcion_seq',6,true);"
+  No se ejecutó restaurar-datos.sql (habría duplicado empleado y TablaY).
+
+Estado DESPUÉS:
+  nomina=24, detalle_percepcion=6, empleado=4, TablaY=6, detalle_deduccion=0
+  id100 existe con 2700.00/270.00; 21..25 = 2800.00/280.00; detalle 6 -> 100
+  secuencias: nomina=100/t, detalle_percepcion=6/t
+  COPY ordenado de nomina y detalle: idéntico byte a byte al respaldo previo a la prueba
+  12 FK presentes y convalidated=t
+
+Capturas nuevas (deliverables/capturas), 1190x850:
+  p2-ejercicio-66.png  26314 bytes  b66e1a7845c090d8fb7b47017eca692f209cce679022c620695af493cb38653c
+  p2-ejercicio-67.png  77458 bytes  6f999e7ca2a5b3bb8e6cb65d3c56a401b2f33c2c00a779036c9dab7f274944e3
+  p2-ejercicio-68.png  16089 bytes  c8fdf604fc481c391f59181b1ef036b3b987a978c86c7fd9f5657bc501aa5a0f
+  p2-ejercicio-69.png  71253 bytes  be61b457641e21c7afe99d723974b232c98d70df81b67f110e65e0c1aec003bc
+
+Capturas anteriores (respaldadas en <ruta-local>/archive/recaptura-66-69-antiguas):
+  p2-ejercicio-66.png  23734 bytes  59d55675b0f9bbeebeaf8a9757b135c33203892e930a7dfb964d0cc6d51b47bb
+  p2-ejercicio-67.png  71400 bytes  745c22dad0d6af66c0c78ad8d08725ecc3839df63e4554d9a6965ab5574d77f1
+      (mostraba 1900.00/1700.00 en 21..25: estado anterior a los lotes 4 y 5)
+  p2-ejercicio-68.png  14806 bytes  b81a23bbcac4410d77121300700bf94ce410d3d3a5300443784ea59e30756122
+  p2-ejercicio-69.png  65732 bytes  e42d25266d2c1c0e1b84d8e9a1b84cdbb81a8d661e665a3367184a19cafb4933
+
+Desviaciones: ninguna. No se editaron .md ni .sql; no se tocaron otros servidores.

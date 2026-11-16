@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 1tRnJA8DzyhRBR4KJPdkI9dIabWtWhN3zRYN5VSnH3vU9nePYdICDImk9vKcJv5
+\restrict gdrM8Zg6feTwE2A3GLb5D7t8AdiZAlodKEZi6PfffCbTNvBiwhBCN0lncMr7SMk
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -60,5 +60,5 @@ SELECT pg_catalog.setval('public.nomina_id_nomina_seq', 6, true);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 1tRnJA8DzyhRBR4KJPdkI9dIabWtWhN3zRYN5VSnH3vU9nePYdICDImk9vKcJv5
+\unrestrict gdrM8Zg6feTwE2A3GLb5D7t8AdiZAlodKEZi6PfffCbTNvBiwhBCN0lncMr7SMk
 

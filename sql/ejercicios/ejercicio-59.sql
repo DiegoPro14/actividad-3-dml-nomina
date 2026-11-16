@@ -1,0 +1,3 @@
+-- Ejercicio 59: Mostrar el contenido completo de TablaY
+
+SELECT * FROM public."TablaY" ORDER BY id;

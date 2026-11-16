@@ -12,7 +12,13 @@
 | Nombre del Docente | John Carlos Arrieta Arrieta |
 | Fecha de Entrega | *Pendiente de completar* |
 
-> Los datos de universidad, programa, estudiante y docente se tomaron de la Actividad 1 desarrollada por el compañero (páginas 1–2), recibida el 14/11/2026.
+> Los datos de universidad, programa, estudiante y docente se tomaron de la Actividad 1 (páginas 1–2), recibida el 14/11/2026.
+
+<style>
+div + h2 { page-break-before: avoid; }
+</style>
+
+<div style="page-break-before: always;"></div>
 
 ## Página 2 — Enlaces del proyecto
 
@@ -24,9 +30,19 @@
 
 > Los enlaces deben ser públicos o visibles para cualquiera con el enlace. No se publicó nada.
 
+**Entorno de pruebas — versiones de los motores:**
+
+| Motor | Versión observada |
+|---|---|
+| PostgreSQL | 18.6 |
+| SQL Server | 2025 |
+| Oracle | 26ai Free 23.26.3 |
+
+**MySQL:** no se usó en esta actividad. Se siguió la misma ruta de respaldos de los tres motores que se trabajó en las Actividades 1 y 2.
+
 ## Primera parte (30 %)
 
-Cada punto requiere descripción detallada de pasos y capturas. Se dejan los espacios de captura; no se inventaron imágenes.
+Cada punto requiere descripción detallada de pasos y capturas.
 
 ### Punto 1. Clientes SQL GUI oficiales por cada motor
 
@@ -119,15 +135,36 @@ Generado con **SQL Developer Data Modeler** mediante la importación del diccion
 
 **Desarrollo:** el usuario es `7502220042_darias`. Las contraseñas están documentadas en las capturas de la Actividad 2 (PostgreSQL p. 6; Oracle p. 5; SQL Server p. 5) y no se transcriben en el proyecto.
 
+En las tres sentencias de creación que siguen la contraseña se escribe como `<contraseña>`: es un marcador, no la clave real. Las capturas muestran la conexión abierta con el usuario creado y la base de trabajo, no la sentencia de creación.
+
 **Ejecutado el 14/11/2026 en las tres copias, con reconexión real:** PostgreSQL (login y 13 tablas de NOMINA visibles), SQL Server (login + `db_owner`; se remapeó un usuario huérfano del `.bak` por SID distinto) y Oracle (usuario `OPEN` con `DBA`). El usuario se recreó el 15/11/2026 tras reconstruir la copia de prueba. Evidencia: archivo `punto-05-usuarios-creados.txt`, incluido en el repositorio.
 
 #### PostgreSQL
+
+Sentencia de creación ejecutada:
+
+```sql
+CREATE USER "7502220042_darias" WITH PASSWORD '<contraseña>';
+GRANT CONNECT ON DATABASE "7502220042_2_nomina" TO "7502220042_darias";
+GRANT USAGE ON SCHEMA public TO "7502220042_darias";
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO "7502220042_darias";
+```
+
+**Verificación:** la base concede `CONNECT` al rol, el esquema `public` concede `USAGE` y el rol tiene 52 privilegios DML (cuatro por cada una de las 13 tablas).
 
 La captura muestra el servidor `NOMINA actividad` registrado en pgAdmin 4 y una sesión abierta sobre la base `7502220042_2_nomina` con el usuario `7502220042_darias`. La consulta `SELECT current_user, current_database();` devuelve `7502220042_darias` y `7502220042_2_nomina`: no es una sesión con el usuario administrador ni sobre otra base, sino la conexión real a la copia de prueba con el usuario creado para la actividad.
 
 ![Punto 5 — PostgreSQL: conexión real con el usuario creado](capturas/p1-punto-05-postgresql.png)
 
 #### Oracle
+
+Sentencia de creación ejecutada:
+
+```sql
+CREATE USER "7502220042_darias" IDENTIFIED BY "<contraseña>"
+  DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+GRANT CREATE SESSION, DBA TO "7502220042_darias";
+```
 
 La captura corresponde a SQL Developer con la conexión `NOMINA actividad Oracle` abierta. En la hoja de trabajo se ejecutó:
 
@@ -143,13 +180,28 @@ La consulta devuelve el usuario de la sesión y el contenedor donde se abrió. E
 
 ![Punto 5 — Oracle: conexión con el usuario de la actividad en el PDB NOMINAPDB](capturas/p1-punto-05-oracle.png)
 
+#### SQL Server
+
+<p style="page-break-after: avoid;"><strong>Sentencia de creación ejecutada:</strong></p>
+
+```sql
+CREATE LOGIN [7502220042_darias] WITH PASSWORD = N'<contraseña>',
+    DEFAULT_DATABASE = [7502220042_2_nomina];
+
+USE [7502220042_2_nomina];
+CREATE USER [7502220042_darias] FOR LOGIN [7502220042_darias];
+ALTER ROLE db_owner ADD MEMBER [7502220042_darias];
+```
+
+El `.bak` traía un usuario con otro SID; cuando el login ya existía se remapeó el usuario de la base con `ALTER USER [7502220042_darias] WITH LOGIN = [7502220042_darias];`, porque sin ese paso la conexión fallaba con error 38. La captura muestra la conexión desde Azure Data Studio sobre la base `7502220042_2_nomina` con el login creado; la contraseña no se transcribe.
+
 **Captura requerida:** `[CAPTURA PENDIENTE: punto 5, SQL Server]`
 
 ### Punto 6. Reconexión con `usuario_xyz`
 
 **Descripción de pasos:** Desconectar y volver a conectar con esas credenciales.
 
-**Desarrollo:** reconexión verificada por CLI en los tres motores (`reconexion=7502220042_darias@…`) y capturada por GUI en PostgreSQL y en Oracle. Falta la captura de SQL Server.
+**Desarrollo:** reconexión verificada en el cliente en los tres motores (`reconexion=7502220042_darias@…`); las capturas de PostgreSQL y Oracle muestran la GUI después de reconectar. Falta la captura de SQL Server.
 
 #### PostgreSQL
 
@@ -240,15 +292,17 @@ La captura muestra la hoja de trabajo de SQL Developer y, en `Query Result`, las
 
 ### Punto 8. IDE(s)
 
-**Descripción de pasos:** Instalar al menos tres IDE y conectarlos a los tres motores usados.
+**Descripción de pasos:** Instalar al menos tres IDE y conectarlos a los tres motores usados, con una conexión por IDE (tres en total).
 
-**Desarrollo:** esta máquina ya tiene **VS Code**, **DBeaver** e **IntelliJ IDEA**. Falta instalar/verificar drivers, configurar las nueve conexiones y capturarlas.
+**Desarrollo:** esta máquina ya tiene **VS Code**, **DBeaver** e **IntelliJ IDEA**. Queda configurar una conexión por IDE (tres en total), cubriendo los tres motores, y capturarlas.
 
 **Captura requerida:** `[CAPTURA PENDIENTE: punto 8]`
 
+<div style="page-break-before: always;"></div>
+
 ## Segunda parte (70 %)
 
-Formato por ejercicio: **A)** texto SQL, **B)** explicación, **C)** recorte de pantalla del editor y resultado. **Alcance:** la segunda parte se ejecuta en un motor (PostgreSQL) con un cliente GUI; el punto 4 es el que exige los tres. Las capturas 1–69 están hechas con un cliente GUI web. Los 69 ejercicios están ejecutados y capturados.
+Formato por ejercicio: **A)** texto SQL, **B)** explicación, **C)** recorte de pantalla del editor y resultado. **Alcance:** la primera parte se documenta en los tres motores; la segunda parte se resuelve en uno de ellos. Las capturas 1–69 están hechas con un cliente GUI web. Los 69 ejercicios están ejecutados y capturados.
 
 ### Ejercicio 1. Insertar en TablaZ al menos un registro usando la forma de inserción completa de SQL
 
@@ -261,7 +315,7 @@ VALUES
     (1, 'Beca académica', 250.00, 1);
 ```
 
-**B. Explicación:** Inserta una fila en la tabla hija con todas sus columnas. id_nomina = 1 referencia la nómina creada en el ejercicio 3; sin ese padre la FK fallaría.
+**B. Explicación:** Inserta una fila en la tabla hija con todas sus columnas. id_nomina = 1 referencia la nómina creada en el ejercicio 3; sin ese padre la FK fallaría. Por eso el padre se creó primero: el orden de ejecución fue 3→1.
 
 **Resultado obtenido:** INSERT 0 1. Fila id_detalle_percepcion = 1, concepto 'Beca académica', importe 250.00, id_nomina 1.
 
@@ -810,16 +864,70 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 
 ### Ejercicio 30. Repetir la operación practicando con las siguientes fechas y mostrando el resultado
 
-**A. Instrucción SQL (plantilla; cambia el id y el literal de fecha):**
+**A. Instrucciones SQL (una por fecha, con el id que consumió la secuencia):**
 
 ```sql
+-- 30a
 INSERT INTO public.nomina
     (id_nomina, mes, anio, fecha_emision,
      total_percepciones, total_deducciones,
      neto_a_pagar, dni_empleado)
 VALUES
-    (<id>, 2, 2023, '<fecha>',
-     2000.00, 200.00, 1800.00, NULL)
+    (37, 2, 2023, '23-12-10', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30b
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (38, 2, 2023, '01/14/2023', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30c
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (39, 2, 2023, '-10/08/2023', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30d
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (40, 2, 2023, '12/30-2023', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30e
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (41, 2, 2023, '12-30-2023', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30f
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (42, 2, 2023, '2023-50-20', 2000.00, 200.00, 1800.00, NULL)
+RETURNING *;
+
+-- 30g
+INSERT INTO public.nomina
+    (id_nomina, mes, anio, fecha_emision,
+     total_percepciones, total_deducciones,
+     neto_a_pagar, dni_empleado)
+VALUES
+    (43, 2, 2023, '2023-06-21', 2000.00, 200.00, 1800.00, NULL)
 RETURNING *;
 ```
 
@@ -966,6 +1074,31 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 **Resultado obtenido:** 24 filas.
 
 **C. Captura:** ![Ejercicio 39](capturas/p2-ejercicio-39.png)
+
+### Preparación de datos de prueba (ejercicios 40–56)
+
+Los ejercicios 40 a 56 filtran por la columna `dni_empleado`, así que antes de ejecutarlos se cargaron cuatro empleados y se ligaron las nóminas 21–25 a esos DNI. Son **datos de prueba**, no información de personas reales.
+
+```sql
+INSERT INTO public.empleado
+    (dni, nombres, apellidos, telefono, direccion,
+     fecha_nacimiento, num_cuenta_corriente)
+VALUES
+    ('ABC001', 'Ana',     'Becerra', '3001112233', 'Calle 1 #2-03', DATE '1990-01-15', '0011223344'),
+    ('ABCD123','Alberto', 'Cadena',  '3003334455', 'Calle 3 #4-05', DATE '1992-03-25', '0033445566'),
+    ('ABCXYZ', 'Andres',  'Cruz',    '3004445566', 'Calle 4 #5-06', DATE '1993-04-30', '0044556677'),
+    ('XYZ999', 'Ximena',  'Yepes',   '3002223344', 'Calle 2 #3-04', DATE '1991-02-20', '0022334455');
+```
+
+```sql
+UPDATE public.nomina SET dni_empleado = 'ABC001'  WHERE id_nomina = 21 RETURNING *;
+UPDATE public.nomina SET dni_empleado = 'XYZ999'  WHERE id_nomina = 22 RETURNING *;
+UPDATE public.nomina SET dni_empleado = 'ABCD123' WHERE id_nomina = 23 RETURNING *;
+UPDATE public.nomina SET dni_empleado = 'ABCXYZ'  WHERE id_nomina = 24 RETURNING *;
+UPDATE public.nomina SET dni_empleado = 'ABC001'  WHERE id_nomina = 25 RETURNING *;
+```
+
+El orden importa: primero el padre (`empleado`) y después la FK de `nomina`; al revés, la FK rechazaría los DNI. Con esto quedan cinco nóminas con DNI (21 y 25 con `ABC001`, 22 con `XYZ999`, 23 con `ABCD123`, 24 con `ABCXYZ`) y diecinueve con NULL, que es lo que explican los conteos de los ejercicios 40–57.
 
 ### Ejercicio 40. Cambiar columna1 y columna2 en TablaX solo en registros cuyo valor de columnaX esté entre A y Z
 
@@ -1135,6 +1268,8 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 
 **C. Captura:** ![Ejercicio 51](capturas/p2-ejercicio-51.png)
 
+**Nota de evidencia:** la fila modificada por el ejercicio 52 se ve en su captura, donde el `UPDATE` usa `RETURNING *`. El `SELECT` de esta captura puede no reflejar el cambio si el cliente conserva en pantalla un resultado anterior.
+
 ### Ejercicio 52. Cambiar columna1 y columna2 en TablaX solo en registros cuyo valor en columnaX contenga ABCD
 
 **A. Instrucción SQL:**
@@ -1162,6 +1297,8 @@ SELECT * FROM public.nomina ORDER BY id_nomina;
 **Resultado obtenido:** 24 filas.
 
 **C. Captura:** ![Ejercicio 53](capturas/p2-ejercicio-53.png)
+
+**Nota:** el `UPDATE` del ejercicio 52 muestra la fila modificada con `RETURNING *`; esta captura es un `SELECT` y puede no reflejar el cambio.
 
 ### Ejercicio 54. Cambiar columna1 y columna2 en TablaX solo en registros cuyo valor en columnaX sea igual a NULL
 
@@ -1239,9 +1376,11 @@ CREATE TABLE public."TablaY" (
 );
 ```
 
-**B. Explicación:** crea la tabla pedida. `id` es autoincremental; `fecha` es fecha-hora; los textos usan `varchar`/`text`; las notas y cálculos son decimales. `definitiva` y `promedio` se declaran con 3 decimales para que coincidan con los ejemplos del documento.
+**B. Explicación:** `bd_ejercicio_xyz` es el marcador genérico de la guía; la base real de trabajo es `7502220042_2_nomina`, donde se creó la tabla. `id` es autoincremental; `fecha` es fecha-hora; los textos usan `varchar`/`text`; las notas y cálculos son decimales. `definitiva` y `promedio` se declaran con 3 decimales para que coincidan con los ejemplos del documento.
 
 **Resultado obtenido:** tabla creada con 11 columnas.
+
+**Nota sobre la precisión:** la captura 58 muestra `numeric(5,2)` porque la tabla se creó así en ese momento. Después se amplió la precisión de las columnas calculadas a `numeric(6,3)` para que `0.333` y `0.666` coincidan con el documento; el SQL de este informe muestra la versión final, no la de la captura.
 
 **C. Captura:** ![Ejercicio 58](capturas/p2-ejercicio-58.png)
 
@@ -1310,6 +1449,8 @@ RETURNING *;
 **B. Explicación:** calcula `definitiva` con pesos 20 %, 20 % y 60 %, y `promedio` como la media de las tres notas. Los NULL se tratan como 0, que es lo que reflejan los ejemplos del documento (`1,NULL,NULL → 0.2 / 0.333`).
 
 **Resultado obtenido:** 6 filas. Valores: 0.200/0.333, 0.400/0.666, 1.000/1.000, 0.800/1.333, 1.700/2.833, 4.700/4.500.
+
+Los valores calculados se ven en la captura del ejercicio 63, que muestra la tabla ya actualizada; el `RETURNING *` del 62 no se despliega en el cliente.
 
 **C. Captura:** ![Ejercicio 62](capturas/p2-ejercicio-62.png)
 
@@ -1415,4 +1556,10 @@ SELECT * FROM public."TablaY" ORDER BY id;
 **Resultado obtenido:** 6 filas en mayúscula.
 
 **C. Captura:** ![Ejercicio 69](capturas/p2-ejercicio-69.png)
+
+**Nota de cierre de la serie:** después de tomar las capturas se restauraron los datos de la copia de prueba. La base quedó con 24 nóminas, 6 detalles de percepción, `TablaY` con 6 filas y 4 empleados de prueba.
+
+## Conclusión
+
+La actividad recorrió las tres operaciones DML sobre una copia restaurada de la base NOMINA. Los INSERT mostraron las formas completa, parcial y múltiple, y los rechazos por PK duplicada, FK inexistente, NOT NULL, tipo y fecha inválida. Los UPDATE permitieron comprobar filtros por PK, por rangos, por texto (`BETWEEN`, `LIKE`) y por NULL, además de la conversión de tipos y el efecto de `ON UPDATE CASCADE`. Los DELETE evidenciaron el borrado de una fila con cascada y el borrado masivo. Las capturas, la restauración posterior y las verificaciones de catálogo dejan el estado de la copia de prueba documentado y reproducible.
 

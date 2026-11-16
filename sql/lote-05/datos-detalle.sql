@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict vpUR0lFb49l6zy7MbnIeCh0ebJkuRCTdz9zYQPnQa8orrJfcY7GhQj0HOz5wXAa
+\restrict jRd2O9irU5jYdnpVVKTBfiba2l7184eKuwiPhywYb6gBIuL0l0laNxXCtIgXuBM
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -42,5 +42,5 @@ SELECT pg_catalog.setval('public.detalle_percepcion_id_detalle_percepcion_seq', 
 -- PostgreSQL database dump complete
 --
 
-\unrestrict vpUR0lFb49l6zy7MbnIeCh0ebJkuRCTdz9zYQPnQa8orrJfcY7GhQj0HOz5wXAa
+\unrestrict jRd2O9irU5jYdnpVVKTBfiba2l7184eKuwiPhywYb6gBIuL0l0laNxXCtIgXuBM
 

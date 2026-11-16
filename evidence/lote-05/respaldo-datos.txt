@@ -1,16 +1,77 @@
-Respaldo de datos — estado final (regenerado)
-Fecha: 2026-11-15T12:31:13
-Motivo: el respaldo anterior (12:15) se tomó antes de que terminara el lote 40–57; la restauración
-devolvía un estado anterior. Este respaldo refleja el estado final tras reaplicar 2700/2800.
+Respaldo de datos del lote 05 — autocontenido y verificado
+Fecha: 2026-11-15T21:26:22-05:00
+Base origen: 7502220042_2_nomina (clúster <ruta-del-clúster>/pgdata, puerto 55432, usuario ema)
+Método: pg_dump 18.6 --data-only --column-inserts, una tabla por archivo.
 
-nomina:
-  INSERT: 24
-  bytes: 5697
-  sha256: c59d637315229bbea1e09cb67000bd547c9ea12199ae1b7f349aeb1eac117750
-detalle_percepcion:
-  INSERT: 6
-  bytes: 1794
-  sha256: b56f4ae096cb52f3cc246c42995c7867ea5cf5bb37eaa8f83e08e6c9b2c00c4c
+Contenido del respaldo (filas observadas en la base origen):
+  empleado              4
+  nomina               24
+  detalle_percepcion    6
+  TablaY                6
 
-Estado verificado: nomina=24, detalle=6, id100=2700/270, 21–25=2800/280, TablaY=6.
-Restauración: cd sql/lote-05 && psql -h <ruta-del-clúster>/socket -p 55432 -U ema -d 7502220042_2_nomina -f restaurar-datos.sql
+Archivos (ruta relativa a sql/lote-05):
+  datos-empleado.sql
+    INSERT: 4
+    bytes: 1601
+    sha256: 9f656c86a0fe20e3ecc61e41605af4ad32673d3dc489b5e450f8f2760d1155a9
+  datos-nomina.sql
+    INSERT: 24
+    bytes: 5697
+    sha256: 54c75abf717bfaa3c4e3998b9f8e633a6877dd25e14ae113f3b1fd610c50c9ed
+  datos-detalle.sql
+    INSERT: 6
+    bytes: 1794
+    sha256: 0da438a7465eb20319d675850fb0a58fdb2d24244ffdbce935fc74815e0b681e
+  datos-tablay.sql
+    INSERT: 6
+    bytes: 2831
+    sha256: dc9f47856febc0df7450c59149b539468651e132a00c5882eae83fdb833c245b
+  restaurar-datos.sql (script de carga, no contiene datos)
+    bytes: 5127
+    sha256: e0afcaf0287ab9cab8787c04a1d270da6639d9786dd1c0f81829eb8005b75d4c
+
+Orden de restauración (respeta las FK observadas):
+  empleado -> nomina -> detalle_percepcion -> TablaY
+  FK implicadas: nomina.fk_nomina_empleado (dni_empleado -> empleado.dni)
+                 detalle_percepcion.fk_dpercep_nomina (id_nomina -> nomina.id_nomina)
+
+Secuencias al final de la carga:
+  public.nomina_id_nomina_seq                         last_value=100, is_called=t (max id_nomina=100)
+  public.detalle_percepcion_id_detalle_percepcion_seq last_value=6,   is_called=t (max id=6)
+  public."TablaY_id_seq"                              last_value=6,   is_called=t (max id=6)
+
+Corrección aplicada en la base principal (solo secuencia, sin tocar filas):
+  SELECT pg_catalog.setval('public.nomina_id_nomina_seq', 100, true);   -- antes: 6
+  Conteos posteriores sin cambios: nomina=24, detalle_percepcion=6, empleado=4, TablaY=6.
+
+Nota sobre el esquema: backup_7502220042_2_nomina.dump (2026-11-09) no contiene
+"TablaY" ni su secuencia. Para que la restauración sea posible en limpio,
+restaurar-datos.sql crea "TablaY", "TablaY_id_seq" (OWNED BY id), su default y su
+PK si no existen; el DDL se copió de la base principal y se comparó con
+pg_dump --schema-only (idéntico salvo el dueño, que se omite a propósito).
+El dump tampoco incluye "TablaY" en su TOC, por lo que un pg_restore del dump
+completo no la recrearía.
+
+Prueba de restauración en limpio:
+  Base temporal: restore_test_u3 (creada con CREATE DATABASE, se deja en el clúster).
+  1) psql -c 'CREATE DATABASE restore_test_u3;'                          -> OK
+  2) pg_restore -d restore_test_u3 --schema-only --no-owner --no-privileges
+     backup_7502220042_2_nomina.dump                                      -> exit 0, sin errores
+  3) cd sql/lote-05 && psql -U ema -d restore_test_u3 -f restaurar-datos.sql
+                                                                          -> exit 0, COMMIT
+  Verificación posterior (consultas de solo lectura):
+    empleado=4, nomina=24, detalle_percepcion=6, TablaY=6
+    nóminas sin empleado: 0
+    detalles sin nómina: 0
+    12 FK presentes y convalidated=t
+    secuencias: nomina=100/t, detalle_percepcion=6/t, TablaY=6/t
+    comparación fila a fila (COPY ordenado) con la base origen: idéntica en las 4 tablas
+
+Limitaciones y pendientes:
+  - restaurar-datos.sql no es idempotente sobre tablas con datos: usa las PK originales
+    y falla por duplicado. Está pensado para una base recién creada o con las 4 tablas vacías.
+    No incluye DELETE ni TRUNCATE.
+  - Los archivos generados por pg_dump 18.6 incluyen un token aleatorio \restrict, por lo
+    que los SHA-256 cambian en cada regeneración aunque los datos sean los mismos.
+  - restore_test_u3 queda en el clúster para revisión; no se ha eliminado.
+  - No se ejecutó DELETE, TRUNCATE ni DROP en la base principal.

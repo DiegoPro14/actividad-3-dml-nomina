@@ -115,7 +115,7 @@ Las 13 tablas son: `cargo`, `categoria`, `complemento`, `contrato`, `deduccion`,
 
 - PostgreSQL: pgAdmin → **ERD Tool** (`Object → ERD For Database`). **Generado y capturado** con las 13 tablas.
 - Oracle: SQL Developer → **Data Modeler** (`File → Data Modeler → Import → Data Dictionary`). **Generado y capturado** con las 13 tablas.
-- SQL Server: SSMS → **Database Diagrams**. SSMS no existe para Linux; alternativa prevista: DBeaver Community 26.2, la misma herramienta usada en la Actividad 2.
+- SQL Server: DBeaver Community → **ER Diagram**. **Generado y capturado** con las 13 tablas. SSMS no existe para Linux; DBeaver es la alternativa usada también en la Actividad 2.
 
 #### PostgreSQL
 
@@ -127,7 +127,11 @@ Generado con **SQL Developer Data Modeler** mediante la importación del diccion
 
 ![Punto 4 — ERD Oracle](capturas/p1-punto-04-oracle-erd.png)
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 4, SQL Server]`
+#### SQL Server
+
+Generado con **DBeaver Community** (ER Diagram) sobre las 13 tablas del esquema `dbo`. SSMS no está disponible para Linux; DBeaver es la alternativa usada en la Actividad 2.
+
+![Punto 4 — ERD SQL Server](capturas/p1-punto-04-sqlserver-erd.png)
 
 ### Punto 5. Usuario `usuario_xyz`
 
@@ -193,15 +197,25 @@ CREATE USER [7502220042_darias] FOR LOGIN [7502220042_darias];
 ALTER ROLE db_owner ADD MEMBER [7502220042_darias];
 ```
 
-El `.bak` traía un usuario con otro SID; cuando el login ya existía se remapeó el usuario de la base con `ALTER USER [7502220042_darias] WITH LOGIN = [7502220042_darias];`, porque sin ese paso la conexión fallaba con error 38. La captura muestra la conexión desde Azure Data Studio sobre la base `7502220042_2_nomina` con el login creado; la contraseña no se transcribe.
+El `.bak` traía un usuario con otro SID; cuando el login ya existía se remapeó el usuario de la base con `ALTER USER [7502220042_darias] WITH LOGIN = [7502220042_darias];`, porque sin ese paso la conexión fallaba con error 38.
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 5, SQL Server]`
+La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQL Server` y la base `7502220042_2_nomina` seleccionada. En la hoja de trabajo se ejecutó:
+
+```sql
+SELECT SUSER_SNAME() AS usuario, DB_NAME() AS base;
+```
+
+**Resultado obtenido:** una fila, con `usuario = 7502220042_darias` y `base = 7502220042_2_nomina`.
+
+La consulta devuelve el login de la sesión y la base activa. El login es el creado para la actividad y la base es la copia de prueba: la sesión no quedó abierta con `sa` ni sobre otra base. La contraseña no se transcribe.
+
+![Punto 5 — SQL Server: conexión con el usuario creado sobre la copia de prueba](capturas/p1-punto-05-sqlserver.png)
 
 ### Punto 6. Reconexión con `usuario_xyz`
 
 **Descripción de pasos:** Desconectar y volver a conectar con esas credenciales.
 
-**Desarrollo:** reconexión verificada en el cliente en los tres motores (`reconexion=7502220042_darias@…`); las capturas de PostgreSQL y Oracle muestran la GUI después de reconectar. Falta la captura de SQL Server.
+**Desarrollo:** reconexión verificada en el cliente en los tres motores (`reconexion=7502220042_darias@…`); las capturas de PostgreSQL, Oracle y SQL Server muestran el cliente después de reconectar.
 
 #### PostgreSQL
 
@@ -227,7 +241,23 @@ La segunda captura corresponde a la sesión ya reconectada. Se ejecutó `SELECT 
 
 ![Punto 6 — Oracle: reconectado con el usuario de la actividad](capturas/p1-punto-06-oracle-reconectado.png)
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 6, SQL Server]`
+#### SQL Server
+
+Se cerró la sesión de la conexión `NOMINA actividad SQL Server` en Azure Data Studio. La primera captura muestra esa conexión desconectada en el panel de conexiones: el nodo queda cerrado y sin desplegar los objetos de la base.
+
+![Punto 6 — SQL Server: conexión cerrada](capturas/p1-punto-06-sqlserver-desconectado.png)
+
+La segunda captura corresponde a la conexión ya reabierta con las mismas credenciales: el nodo aparece desplegado con los objetos de la base `7502220042_2_nomina` y, sobre esa sesión, se ejecutó de nuevo:
+
+```sql
+SELECT SUSER_SNAME() AS usuario, DB_NAME() AS base;
+```
+
+**Resultado obtenido:** `7502220042_darias` y `7502220042_2_nomina`.
+
+El resultado confirma que la segunda conexión no fue con `sa` ni sobre otra base: la sesión reconectada quedó como `7502220042_darias` sobre `7502220042_2_nomina`, la copia de prueba.
+
+![Punto 6 — SQL Server: reconexión con el usuario de la actividad](capturas/p1-punto-06-sqlserver-reconectado.png)
 
 <div style="page-break-before: always;"></div>
 
@@ -235,7 +265,7 @@ La segunda captura corresponde a la sesión ya reconectada. Se ejecutó `SELECT 
 
 **Descripción de pasos:** Mostrar las bases de datos de `usuario_xyz`.
 
-**Desarrollo:** consulta de catálogo ejecutada y capturada en PostgreSQL y en Oracle; falta la de SQL Server. En Oracle el equivalente se expresa como PDB y esquema, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
+**Desarrollo:** consulta de catálogo ejecutada y capturada en los tres motores. En Oracle el equivalente se expresa como PDB y esquema, porque no existen “bases” separadas como en PostgreSQL o SQL Server.
 
 #### PostgreSQL
 
@@ -288,7 +318,31 @@ La captura muestra la hoja de trabajo de SQL Developer y, en `Query Result`, las
 
 ![Punto 7 — Oracle: PDB de la sesión y tablas del esquema](capturas/p1-punto-07-oracle.png)
 
-**Captura requerida:** `[CAPTURA PENDIENTE: punto 7, SQL Server]`
+#### SQL Server
+
+Consulta ejecutada:
+
+```sql
+SELECT name AS base
+FROM sys.databases
+WHERE HAS_DBACCESS(name) = 1
+ORDER BY name;
+```
+
+**Resultado obtenido:** 4 bases de datos.
+
+| # | Base de datos |
+|---:|---|
+| 1 | `7502220042_2_nomina` |
+| 2 | `master` |
+| 3 | `msdb` |
+| 4 | `tempdb` |
+
+La primera es la base de la copia de prueba, donde está la tabla NOMINA; las otras tres son las bases del sistema que la instalación deja accesibles. La consulta filtra con `HAS_DBACCESS(name) = 1`, así que solo aparecen las bases a las que el usuario puede conectarse.
+
+La captura corresponde a Azure Data Studio con la conexión `NOMINA actividad SQL Server` sobre la base `7502220042_2_nomina`; el resultado tiene 4 filas.
+
+![Punto 7 — SQL Server: bases de datos accesibles para el usuario](capturas/p1-punto-07-sqlserver.png)
 
 ### Punto 8. IDE(s)
 

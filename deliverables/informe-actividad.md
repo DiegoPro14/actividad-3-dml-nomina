@@ -25,7 +25,7 @@ div + h2 { page-break-before: avoid; }
 | Recurso | Enlace |
 |---|---|
 | Google Drive del documento | *Pendiente* |
-| Repositorio GitHub (fork, ramas, commits, PR) | *Pendiente* |
+| Repositorio GitHub (fork, ramas, commits, PR) | https://github.com/DiegoPro14/actividad-3-dml-nomina |
 | Video de sustentación | *Pendiente* |
 
 > Los tres enlaces se completarán al publicar el documento, el repositorio y el video. Mientras la publicación no ocurra, la celda queda como *Pendiente*; no se adelanta ninguna URL. Los enlaces deben ser públicos o visibles para cualquiera que los reciba.
